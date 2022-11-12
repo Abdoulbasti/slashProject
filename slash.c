@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -7,11 +8,9 @@
 
 char prompt_msg[30];
 int last_return_value = 0;
-char* args[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN];
-
-int exit_with_val(int val){
-    return val;
-}
+char args[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN];
+char command[MAX_ARGS_STRLEN];
+char error_msg[MAX_ARGS_STRLEN];
 
 char* prompt_format(){
     prompt_msg[0] = '[';
@@ -20,14 +19,48 @@ char* prompt_format(){
     return prompt_msg;
 }
 
-void* split_line(char* line){
+int split_line(char* line){
     char *tmp;
     int i = 0;
-    tmp = strtok(line, " ");
-    while(tmp != NULL){
-        write(STDOUT_FILENO, (const void*)tmp, strlen(tmp));
-        tmp = strtok(NULL, " ");
+    if(strcmp((const char*) line, (const char*) "") == 0){
+        strcpy(command, (const char*) "");
+        return 0;
     }
+    tmp = strtok(line, " ");
+    strcpy(command, (const char*) tmp);
+    while(tmp != NULL){
+        if(i != 0){
+            strcpy(args[i-1], (const char*) tmp);
+        }
+        tmp = strtok(NULL, " ");
+        i++;
+    }
+    return i-1;
+}
+
+void fexit(int val){
+    exit(val);
+}
+
+int interpretation_command(int argc){
+    if (strcmp((const char*) command, (const char*) "") == 0){
+        return last_return_value;
+    }
+    if(strcmp((const char*) command, (const char*) "exit") == 0){
+        switch (argc)
+        {
+        case 0:
+            fexit(last_return_value);
+            break;
+        case 1:
+            int tmp;
+            sscanf(args[0], "%d", &tmp);
+            fexit(tmp);
+        default:
+            
+        }
+    }
+    return 0;
 }
 
 int main(int argc, char **argv){
@@ -36,6 +69,7 @@ int main(int argc, char **argv){
         line = readline(prompt_format());
         add_history(line);
 
-        split_line(line);
+        int nb_args = split_line(line);
+        interpretation_command(nb_args);
     }
 }
