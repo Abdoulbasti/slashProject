@@ -7,7 +7,7 @@ int main(int argc, char **argv){
     //Traitement de la commande entrée avec la fonction readline
 
     //TRAITEMENT DE LA COMMANDE pwd
-    if (argc<1) return 1;
+    /*if (argc<1) return 1;
     else
     {
         if (strcmp(argv[0], "pwd")==0)
@@ -33,6 +33,8 @@ int main(int argc, char **argv){
             printf("Veuillez entrer la commande : pwd\n");
             return 1;
         }
-    }
+    }*/
+    construit_chemin();
 
+    return 0;
 }

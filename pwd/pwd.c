@@ -1,5 +1,11 @@
 #include "pwd.h"
 
+#define MAX_ARGS_NUMBER 4096
+#define MAX_ARGS_STRLEN 4096
+
+char courant[MAX_ARGS_STRLEN] = ".";
+char pwd[MAX_ARGS_STRLEN]="";
+
 /*
 Fonctions et autres choses utiles :
     getcwd()
@@ -33,9 +39,10 @@ int est_racine(){
 		return 0;
 	}
 
-}
+}  
 
 int construit_chemin(){
+	char pwdWithRoot[MAX_ARGS_STRLEN] = "/";
 	while(!est_racine()){
 		struct stat st;
 		if(stat(courant, &st) == -1){
@@ -71,15 +78,22 @@ int construit_chemin(){
 				sprintf(tmp, "%s", courant);
 			}
 		}
-		printf("s", pwd);
-		return 0;
 	}
+	strcat(pwdWithRoot, pwd);
+	printf("%s\n", pwdWithRoot);
+	return 0;
 }
 
 
 /*
 0 -> succes 
 1 -> echec
+*/
+
+/*
+Evite les liens symbolique, donc s'il y'a un lien symbolique recuperer
+le chemin logique de lien symbolique
+Un chemin ne faisant intervenir aucun lien symblique
 */
 int pwdForP()
 {
@@ -103,7 +117,7 @@ int pwdForP()
 }
 
 /*
-default cas
+Un chemin faisant intervenir eventuellemnt des liens symboliques
 */
 int pwdForL()
 {
