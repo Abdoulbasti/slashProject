@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-char dernier_sym[PATH_MAX] = "";
-char courant_sym[PATH_MAX] = "";
+char dernier_sym[PATH_MAX] = "~";
+char courant_sym[PATH_MAX] = "~";
 char pwd[PATH_MAX];
 
 /*int inoeud_dossier(char * repertoire){
@@ -15,49 +15,49 @@ char pwd[PATH_MAX];
 	//TODO: comment suivre un lien symbolique? 
 }*/
 
-char * prochain_dossier(char * chemin){
+/*char * prochain_dossier(char * chemin){
 	//renvoie le répertoire au début de chemin
 	
-}
+}*/
 
 void cd(int argc, char **argv){
 	printf("argc: %i\n", argc);
 	for(int i = 0; i<argc; i++){
 		printf("argv[%i]: %s\n", i, argv[i]);
 	}
-	if(argc == 1){
+	if(argc == 0){
 		DIR * dir = opendir(getenv("HOME"));
 		if(dir == NULL){
 			perror("erreur ouverture dossier ~");
 		}
 		sprintf(courant_sym, "%s", "~");
 	}
-	else if(argc == 2 && strcmp(argv[1],"-")==0){
+	else if(argc == 1 && strcmp(argv[0],"-")==0){
 		//ouvre le dernier répertoire puis échange les deux chemins symboliques
-		/*DIR * courant = opendir(dernier_sym);
+		DIR * courant = opendir(dernier_sym);
 		char tmp[PATH_MAX];
 		sprintf(tmp, "%s", dernier_sym);
 		sprintf(dernier_sym, "%s", courant_sym);
-		sprintf(courant_sym, "%s", tmp);*/
+		sprintf(courant_sym, "%s", tmp);
 	}
 	//on a le droit d'utiliser strcmp?
-	else if(argc == 2 || (argc == 3 && strcmp(argv[1],"-L")==0)){
-		char parametre[PATH_MAX];
-		if(argc == 2){
-			sprintf(parametre, "%s", argv[1]);
+	else if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
+		char param[PATH_MAX];
+		if(argc == 1){
+			sprintf(param, "%s", argv[0]);
 		}
 		else{
-			sprintf(parametre, "%s", argv[2]);
+			sprintf(param, "%s", argv[1]);
 		}
 		//chemin interprété de manière logique
 		//si la référence logique n'a pas de sens, l'interpréter de manière logique
-		if(parametre[0]=='/'){
-			DIR * d = opendir(parametre);
+		if(param[0]=='/'){
+			DIR * d = opendir(param);
 			if(d == NULL){
 				perror("le chemin n'existe pas");
 			}
 			sprintf(dernier_sym, "%s", courant_sym);
-			sprintf(courant_sym, "%s", argv[2]);
+			sprintf(courant_sym, "%s", param);
 		}
 		/*else{
 			while(strlen(argv[2])!=0){
@@ -87,14 +87,14 @@ void cd(int argc, char **argv){
 		}*/
 
 	}
-	else if(argc == 3 && strcmp(argv[1],"-P")==0){
-		if(argv[2][0]=='/'){
+	else if(argc == 2 && strcmp(argv[0],"-P")==0){
+		if(argv[1][0]=='/'){
 			DIR * d = opendir(argv[2]);
 			if(d == NULL){
 				perror("le chemin n'existe pas");
 			}
 			sprintf(dernier_sym, "%s", courant_sym);
-			sprintf(courant_sym, "%s", argv[2]);
+			sprintf(courant_sym, "%s", argv[1]);
 		}
 		/*else{
 			//inoeud_dossier pour trouver l'on
@@ -111,5 +111,8 @@ int main(int argc, char **argv){
 	//ouvrir le dossier "~"
 	//cd();
 	printf("courant_sym: %s\n", courant_sym);
-	cd(argc,argv);
+	printf("dernier_sym: %s\n", dernier_sym);
+	cd(argc-1,&argv[1]);
+	printf("courant_sym: %s\n", courant_sym);
+	printf("dernier_sym: %s\n", dernier_sym);
 }
