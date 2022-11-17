@@ -10,21 +10,33 @@ char dernier_sym[PATH_MAX] = "~";
 char courant_sym[PATH_MAX] = "~";
 char pwd[PATH_MAX];
 
-/*int inoeud_dossier(char * repertoire){
-	//en fonction des arguments, on devra chercher des dossiers où des liens symboliques 
-	//TODO: comment suivre un lien symbolique? 
-}*/
+//insère dans "res" un string contenant les caractères jusqu'au premier "/" de "chemin"
+void prochain_dossier(char * res, char * chemin){
+	res[0] = '\0';
+	int len = strlen(chemin);
+	int i;
+	for(i = 0; i<len && chemin[i]!='/'; i++){
+		res[i] = chemin[i];
+	}
+	res[i] = '\0';
+}
 
-/*char * prochain_dossier(char * chemin){
-	//renvoie le répertoire au début de chemin
-	
-}*/
+//enlève les caractères jusqu'au premier "/"
+void enlever_dossier(char * chemin){
+	char tmp[PATH_MAX];
+	tmp[0] = '\0';
+	int len = strlen(chemin);
+	int i;
+	for(i = 0; i<len && chemin[i]!='/'; i++){}
+	sprintf(tmp, "%s", chemin);
+	sprintf(chemin, "%s", tmp+i+1);
+}
 
 void cd(int argc, char **argv){
-	printf("argc: %i\n", argc);
+	/*printf("argc: %i\n", argc);
 	for(int i = 0; i<argc; i++){
 		printf("argv[%i]: %s\n", i, argv[i]);
-	}
+	}*/
 	if(argc == 0){
 		DIR * dir = opendir(getenv("HOME"));
 		if(dir == NULL){
@@ -40,7 +52,6 @@ void cd(int argc, char **argv){
 		sprintf(dernier_sym, "%s", courant_sym);
 		sprintf(courant_sym, "%s", tmp);
 	}
-	//on a le droit d'utiliser strcmp?
 	else if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
 		char param[PATH_MAX];
 		if(argc == 1){
@@ -59,32 +70,33 @@ void cd(int argc, char **argv){
 			sprintf(dernier_sym, "%s", courant_sym);
 			sprintf(courant_sym, "%s", param);
 		}
-		/*else{
-			while(strlen(argv[2])!=0){
-				char[PATH_MAX] tmp;
-				//malloc?
-				nom_dossier = prochain_dossier(argv[2]);
+		else{
+			char tmp[PATH_MAX];
+			char * nom_dossier[PATH_MAX];
+			for(int i = 0; i < strlen(param); i++){
+				sprintf(tmp, "%s", courant_sym);
+				char nom_dossier[PATH_MAX];
+				prochain_dossier(nom_dossier, param);
 				if(strcmp(nom_dossier, "..")==0){
-					if(courant_sym == "/"){
+					if(strcmp(tmp, "/")==0){
 						perror("chemin incorrect");
 					}
-					else
-						//enlever le dernier répertoire de tmp
+					else{
+						//enlever_dernier(tmp);
+					}
 				}
 				else{
 					//ajouter le nom du répertoire courant à la fin de tmp
+
 					DIR * d = opendir(tmp);
 					if(d == NULL){
-						perror("chemin incorrect");
+						perror("répertoire inexistant");
 					}
 				}
 			}
-			sprintf(courant, "%s", tmp);
-			//décomposer le chemin en répertoires
-			//itérer entre les répertoires
-			//si le répertoire est "..", enlever le répertoire à la fin de chemin_sym
-			//sinon, concaténer le répertoire à la fin de chemin_sym
-		}*/
+			sprintf(dernier_sym, "%s", courant_sym);
+			sprintf(courant_sym, "%s", tmp);
+		}
 
 	}
 	else if(argc == 2 && strcmp(argv[0],"-P")==0){
@@ -96,9 +108,6 @@ void cd(int argc, char **argv){
 			sprintf(dernier_sym, "%s", courant_sym);
 			sprintf(courant_sym, "%s", argv[1]);
 		}
-		/*else{
-			//inoeud_dossier pour trouver l'on
-		}*/
 	}
 	else{
 		//afficher les instruction d'utilisation
@@ -108,11 +117,12 @@ void cd(int argc, char **argv){
 }
 
 int main(int argc, char **argv){
-	//ouvrir le dossier "~"
 	//cd();
-	printf("courant_sym: %s\n", courant_sym);
-	printf("dernier_sym: %s\n", dernier_sym);
-	cd(argc-1,&argv[1]);
-	printf("courant_sym: %s\n", courant_sym);
-	printf("dernier_sym: %s\n", dernier_sym);
+	char chemin[PATH_MAX] = "fiubbukvd/dfdtstbdtebtb/drdtrbtstbbtd/sdtdtstdstb";
+	char nom_dossier[PATH_MAX];
+	printf("chemin: %s\n", chemin);
+	prochain_dossier(nom_dossier, chemin);
+	printf("prochain_dossier: %s\n", nom_dossier);
+	enlever_dossier(chemin);
+	printf("enlever_dossier: %s\n", chemin);
 }
