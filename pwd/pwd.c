@@ -1,4 +1,5 @@
 #include "pwd.h"
+//#include <sys/stat.h>
 
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
@@ -69,7 +70,15 @@ int construit_chemin(){
 				return 1;
 			}
 
-			if(st2.st_ino == st.st_ino && st2.st_dev == st.st_dev){
+			//Si les fichiers sont pareil en plus un lien symbolique
+			if (S_ISLNK(st.st_mode) && S_ISLNK(st2.st_mode))
+			{
+				printf("Ce dossier est un lien symbolique\n");
+				//pwdForP();
+			}
+
+			if(st2.st_ino == st.st_ino && st2.st_dev == st.st_dev)
+			{
 				//memmove(pwd+strlen(pwd), strcat(entry->d_name, "/"), strlen(entry->d_name)+1);
 
 				sprintf(courant, "%s", tmp);
@@ -80,6 +89,12 @@ int construit_chemin(){
 		}
 	}
 	strcat(pwdWithRoot, pwd);
+	int env = setenv( "PWD" , pwd, 1);
+	/*if (env==-1)
+	{
+		perror("setenv error ");
+		return 1;
+	}*/
 	printf("%s\n", pwdWithRoot);
 	return 0;
 }
@@ -97,6 +112,7 @@ Un chemin ne faisant intervenir aucun lien symblique
 */
 int pwdForP()
 {
+	char pwd[MAX_ARGS_STRLEN];
 	if (getcwd(pwd, sizeof(pwd)) == NULL)
 	{
 		perror("error getwcd ");
