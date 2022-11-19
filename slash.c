@@ -17,51 +17,8 @@ char args[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN];    //arguments de la commande entr�
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
 char chemin_sym[MAX_PATH] = "/";    //Chemin relatif
 
+//initialiser args a
 
-/*int main(int argc, char **argv){
-
-    //Traitement de la commande entrée avec la fonction readline
-
-    //TRAITEMENT DE LA COMMANDE pwd
-    if (argc<1) return 1;
-    else
-    {
-        if (strcmp(argv[0], "pwd")==0)
-        {
-            //Cas d'un lien physique
-            if (strcmp(argv[1], "-P") == 0) 
-            {
-                pwdForP();
-            }
-            //Cas par defaut, cas d'un lien logique
-            else if (strcmp(argv[1], "-L") == 0)
-            {
-                pwdForL();
-            }
-            else if (argv[1] == NULL)
-            {
-                pwdForL();
-            }
-        }
-        else 
-        {
-            perror("strcmp error ");
-            printf("Veuillez entrer la commande : pwd\n");
-            return 1;
-        }
-    }
-
-    return 0;
-}*/
-
-
-/*
-    char* prompt_format() :
-    Créer le prompt sous le format : [0]/Documents$
-        [0]:            retour de la dernière commande exécutée
-        /Documents :    chemin relatif
-    le prompt est écrit directement dans la variable prompt_msg que la fonction renvoie
-*/
 char* prompt_format(){
 
     //Dernière commande exécutée
@@ -160,31 +117,25 @@ int interpretation_command(int argc){
         //pwd -P
         if (strcmp(args[0], "-P") == 0) 
         {
-            pwdForP();
+            last_return_value = pwdForP();
+            //return last_return_value;
         }
         //Cas par defaut, cas d'un lien logique
-        else if (strcmp(args[0], "-L") == 0)
+        else if (strcmp(args[0], "-L") == 0 || strcmp(args[0], "")==0)
         {
-            pwdForL();
+            last_return_value = pwdForL();
+            //return last_return_value;
         }
         else
         {
             print_error("pwd: wrong argument");
+            last_return_value = 1;
         }
-        // pwd -L <=> pwd
-        /*else if (args == NULL)
-        {
-            pwdForL();
-        }*/
     }
-    /*else 
-    {
-        perror("strcmp error ");
-        printf("Veuillez entrer la commande : pwd\n");
-        return 1;
-    }*/
 
-    return 0;
+    //Commande cd
+    
+    return last_return_value;
 }
 
 int main(int argc, char **argv){
