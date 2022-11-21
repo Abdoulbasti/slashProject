@@ -6,8 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-char dernier_sym[PATH_MAX] = "~";
-char courant_sym[PATH_MAX] = "~";
+char dernier_sym[PATH_MAX] = "\0";
 
 //insère dans "res" un string contenant les caractères jusqu'au premier "/" de "chemin"
 void prochain_dossier(char * res, char * chemin){
@@ -44,21 +43,24 @@ void cd(int argc, char **argv){
 	for(int i = 0; i<argc; i++){
 		printf("argv[%i]: %s\n", i, argv[i]);
 	}*/
+	if(strcmp(dernier_sym, "\0") == 0){
+		sprintf(dernier_sym, "%s", getenv("PWD"));
+	}
 	if(argc == 0){
 		DIR * dir = opendir(getenv("HOME"));
 		if(dir == NULL){
 			perror("erreur ouverture dossier ~");
 			exit(1);
 		}
-		sprintf(courant_sym, "%s", getenv("HOME"));
+		setenv("PWD", getenv("HOME"), 1);
 	}
 	else if(argc == 1 && strcmp(argv[0],"-")==0){
 		//ouvre le dernier répertoire puis échange les deux chemins symboliques
 		DIR * courant = opendir(dernier_sym);
 		char tmp[PATH_MAX];
 		sprintf(tmp, "%s", dernier_sym);
-		sprintf(dernier_sym, "%s", courant_sym);
-		sprintf(courant_sym, "%s", tmp);
+		sprintf(dernier_sym, "%s", getenv("PWD"));
+		setenv("PWD", tmp, 1);
 	}
 	else if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
 		char param[PATH_MAX];
@@ -76,17 +78,16 @@ void cd(int argc, char **argv){
 				perror("le chemin n'existe pas");
 				exit(1);
 			}
-			sprintf(dernier_sym, "%s", courant_sym);
-			sprintf(courant_sym, "%s", param);
+			sprintf(dernier_sym, "%s", getenv("PWD"));
+			setenv("PWD", param, 1);
 		}
 		else{
-			//stocke le nouveau cehmin symbolique. Il sera écrit dans la chaîne de caractères "courant_sym" si le chemin est valide
+			//stocke le nouveau chemin symbolique. Il sera écrit dans la variable "pwd" si le chemin est valide
 			char tmp[PATH_MAX];
 			//premier dossier dans le chemin à parcourir
 			char * nom_dossier[PATH_MAX];
-			while(strcat(param, "")!=0){
-				//copie de "courant_sym" dans "tmp"
-				sprintf(tmp, "%s", courant_sym);
+			while(param[0]!='\0'){
+				sprintf(tmp, "%s", getenv("PWD"));
 				char nom_dossier[PATH_MAX];
 				//insertion du nom du prochain dossier dans nom_dossier
 				prochain_dossier(nom_dossier, param);
@@ -120,8 +121,8 @@ void cd(int argc, char **argv){
 					}
 				}
 			}
-			sprintf(dernier_sym, "%s", courant_sym);
-			sprintf(courant_sym, "%s", tmp);
+			sprintf(dernier_sym, "%s", getenv("PWD"));
+			setenv("PWD", tmp, 1);
 		}
 
 	}
@@ -131,8 +132,8 @@ void cd(int argc, char **argv){
 			if(d == NULL){
 				perror("le chemin n'existe pas");
 			}
-			sprintf(dernier_sym, "%s", courant_sym);
-			sprintf(courant_sym, "%s", argv[1]);
+			sprintf(dernier_sym, "%s", getenv("PWD"));
+			setenv("PWD", argv[1], 1);
 		}
 	}
 	else{
@@ -154,7 +155,7 @@ int main(int argc, char **argv){
 	printf("enlever_premier_dossier: %s\n", chemin);
 	enlever_dernier_dossier(chemin);
 	printf("enlever_dernier_dossier: %s\n", chemin);*/
-	printf("Dossier courant: %s\n", courant_sym);
+	printf("Dossier courant: %s\n", getenv("PWD"));
 	cd(argc-1, argv+1);
-	printf("Dossier courant: %s\n", courant_sym);
+	printf("Dossier courant: %s\n", getenv("PWD"));
 }
