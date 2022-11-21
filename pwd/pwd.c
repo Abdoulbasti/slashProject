@@ -1,6 +1,6 @@
 #include "pwd.h"
 #include <limits.h>
-//#include <sys/stat.h>
+#include <sys/stat.h>
 
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
