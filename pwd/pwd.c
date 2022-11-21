@@ -58,3 +58,27 @@ int pwdForL()
 		return 0;
 	}
 }
+
+
+
+/*
+    //Commande pwd
+    if (strcmp(args[0], "-P") == 0)
+    {
+        last_return_value = pwdForP();
+        //return last_return_value;
+    }
+    //Cas par defaut, cas d'un lien logique
+    else if (strcmp(args[0], "-L") == 0 || strcmp(args[0], "")==0)
+    {
+        last_return_value = pwdForL();
+        //return last_return_value;
+    }
+    else
+    {
+        print_error("pwd: wrong argument");
+        last_return_value = 1;
+    }
+    return last_return_value;
+    //return 0;
+ */
