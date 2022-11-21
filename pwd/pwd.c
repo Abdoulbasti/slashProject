@@ -1,4 +1,5 @@
 #include "pwd.h"
+#include <limits.h>
 //#include <sys/stat.h>
 
 #define MAX_ARGS_NUMBER 4096
@@ -22,6 +23,8 @@ Evite les liens symbolique, donc s'il y'a un lien symbolique recuperer
 le chemin logique de lien symbolique
 Un chemin ne faisant intervenir aucun lien symblique
 */
+
+
 int pwdForP()
 {
 	char pwd[MAX_ARGS_STRLEN];
