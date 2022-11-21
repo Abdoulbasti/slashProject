@@ -31,7 +31,17 @@ char* prompt_format(){
     strcat(prompt_msg, (const char*) "]");
 
     //Chemin symbolique
-    strcat(prompt_msg, (const char*) chemin_sym);
+    strcpy(chemin_sym, (const char*) getenv("PWD"));
+    int len_chemin = strlen(chemin_sym);
+    int len_tmp = strlen(tmp);
+    // + len_tmp = len last_return_value; + 4 []$' '
+    if( len_chemin + len_tmp + 4 > 30){
+        strcat(prompt_msg, (const char*) "...");
+        // + len_tmp = taille last_return_value; + 7 = []...$' '; -31 = -30(taille max) -1 = taille vers indice
+        strcat(prompt_msg, (const char*) &chemin_sym[len_chemin - 31 + len_tmp + 7]);
+    }else{
+        strcat(prompt_msg, (const char*) chemin_sym);
+    }
     strcat(prompt_msg, (const char*) "$ ");
     return prompt_msg;
 }
