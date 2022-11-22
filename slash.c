@@ -25,7 +25,6 @@ void enlever_premier_dossier(char * chemin){
 	tmp[0] = '\0';
 	int len = strlen(chemin);
 	int i;
-
 	for(i = 0; i<len && chemin[i]!='/'; i++){}
 	sprintf(tmp, "%s", chemin);
 	if(i == len){
@@ -58,11 +57,21 @@ void cd(int argc, char **argv){
 			perror("erreur ouverture dossier ~");
 			exit(1);
 		}
+		else{
+			closedir(dir);
+		}
 		setenv("PWD", getenv("HOME"), 1);
 	}
 	else if(argc == 1 && strcmp(argv[0],"-")==0){
 		//ouvre le dernier répertoire puis échange les deux chemins symboliques
 		DIR * courant = opendir(dernier_sym);
+		if(courant == NULL){
+			perror("erreur ouverture dossier");
+			exit(1);
+		}
+		else{
+			closedir(courant);
+		}
 		char tmp[PATH_MAX];
 		sprintf(tmp, "%s", dernier_sym);
 		sprintf(dernier_sym, "%s", getenv("PWD"));
@@ -140,7 +149,11 @@ void cd(int argc, char **argv){
 
 	}
 	else if(argc == 2 && strcmp(argv[0],"-P")==0){
+		//naviguer à travers les répertoires sans avoir besoin de gérer de string. Appeler pwd à la fin 
+		//comment ne pas ouvrir les inoeuds? 
 		if(argv[1][0]=='/'){
+			//ouvrir le dossier "/"
+			//faire une boucle comme dans l'interprétation symbolique en vérifiant les répertoires à chaque fois
 			DIR * d = opendir(argv[2]);
 			if(d == NULL){
 				perror("le chemin n'existe pas");
