@@ -25,6 +25,12 @@ Un chemin ne faisant intervenir aucun lien symblique
 */
 
 
+char* printError(char* error_msg){
+    write(STDERR_FILENO, (const void*) error_msg, strlen(error_msg));
+    write(STDERR_FILENO, (const void*) "\n", 1);
+}
+
+
 int pwdForP()
 {
 	char pwd[MAX_ARGS_STRLEN];
@@ -61,24 +67,26 @@ int pwdForL()
 
 
 
-/*
-    //Commande pwd
-    if (strcmp(args[0], "-P") == 0)
+int pwd(char* args)
+{
+	int last_return_value = 1;
+    
+	//Commande pwd
+    if (strcmp(args, "-P") == 0)
     {
         last_return_value = pwdForP();
         //return last_return_value;
     }
     //Cas par defaut, cas d'un lien logique
-    else if (strcmp(args[0], "-L") == 0 || strcmp(args[0], "")==0)
+    else if (strcmp(args, "-L") == 0 || strcmp(args, "")==0)
     {
         last_return_value = pwdForL();
         //return last_return_value;
     }
     else
     {
-        print_error("pwd: wrong argument");
+        printError("pwd: wrong argument");
         last_return_value = 1;
     }
     return last_return_value;
-    //return 0;
- */
+}

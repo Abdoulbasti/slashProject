@@ -6,10 +6,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-int est_racine();
 
-int construit_chemin();
+int pwd(char* args);
 
 int pwdForP();
 
 int pwdForL();
+
+char* printError(char* error_msg);
