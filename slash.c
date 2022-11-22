@@ -26,7 +26,6 @@ void enlever_premier_dossier(char * chemin){
 	tmp[0] = '\0';
 	int len = strlen(chemin);
 	int i;
-
 	for(i = 0; i<len && chemin[i]!='/'; i++){}
 	sprintf(tmp, "%s", chemin);
 	if(i == len){
@@ -167,6 +166,8 @@ void cd(int argc, char **argv){
 
 	}
 	else if(argc == 2 && strcmp(argv[0],"-P")==0){
+		//naviguer à travers les répertoires sans avoir besoin de gérer de string. Appeler pwd à la fin 
+		//comment ne pas ouvrir les inoeuds? 
 		if(argv[1][0]=='/'){
 			int fd = open(argv[2], O_RDONLY, 0666);
 			if(fd < 0){
