@@ -25,13 +25,19 @@ void enlever_premier_dossier(char * chemin){
 	tmp[0] = '\0';
 	int len = strlen(chemin);
 	int i;
+
 	for(i = 0; i<len && chemin[i]!='/'; i++){}
 	sprintf(tmp, "%s", chemin);
-	sprintf(chemin, "%s", tmp+i+1);
+	if(i == len){
+		chemin[0] = '\0';
+	}
+	else{
+		sprintf(chemin, "%s", tmp+i+1);
+	}
 }
 
 //enlève les charactères à partir du dernier "/"
-enlever_dernier_dossier(char * chemin){
+void enlever_dernier_dossier(char * chemin){
 	int len = strlen(chemin);
 	int i;
 	for(i = len; i>0 && chemin[i]!='/'; i--){}
@@ -78,6 +84,9 @@ void cd(int argc, char **argv){
 				perror("le chemin n'existe pas");
 				exit(1);
 			}
+			else{
+				closedir(d);
+			}
 			sprintf(dernier_sym, "%s", getenv("PWD"));
 			setenv("PWD", param, 1);
 		}
@@ -86,11 +95,15 @@ void cd(int argc, char **argv){
 			char tmp[PATH_MAX];
 			//premier dossier dans le chemin à parcourir
 			char * nom_dossier[PATH_MAX];
+			//copie de la valeur de "$PWD" dans "tmp"
+			sprintf(tmp, "%s", getenv("PWD"));
 			while(param[0]!='\0'){
-				sprintf(tmp, "%s", getenv("PWD"));
 				char nom_dossier[PATH_MAX];
-				//insertion du nom du prochain dossier dans nom_dossier
+				//insertion du nom du prochain dossier à parcourir dans nom_dossier
+				printf("\n");
 				prochain_dossier(nom_dossier, param);
+				printf("tmp: %s\n", tmp);
+				printf("param: %s\n", param);
 				printf("nom_dossier: %s\n", nom_dossier);
 				if(strcmp(nom_dossier, "..")==0){
 					if(strcmp(tmp, "/")==0){
@@ -102,23 +115,23 @@ void cd(int argc, char **argv){
 						enlever_dernier_dossier(tmp);
 					}
 				}
+				else if(strcmp(nom_dossier, ".")==0){
+					enlever_premier_dossier(param);
+				}
 				else{
-					//ajouter le nom du répertoire courant à la fin de tmp
-					printf("tmp: %s\n", tmp);
+					//ajout du répertoire courant à la fin de tmp
+					strcat(tmp, "/");
+					strcat(tmp, nom_dossier);
+
 					DIR * d = opendir(tmp);
 					if(d == NULL){
 						perror("répertoire inexistant");
 						exit(1);
 					}
-					strcat(tmp, "/");
-					strcat(tmp, nom_dossier);
-					printf("tmp: %s\n", tmp);
-
-					d = opendir(tmp);
-					if(d == NULL){
-						perror("répertoire inexistant");
-						exit(1);
+					else{
+						closedir(d);
 					}
+					enlever_premier_dossier(param);
 				}
 			}
 			sprintf(dernier_sym, "%s", getenv("PWD"));
@@ -132,6 +145,9 @@ void cd(int argc, char **argv){
 			if(d == NULL){
 				perror("le chemin n'existe pas");
 			}
+			else{
+				closedir(d);
+			}
 			sprintf(dernier_sym, "%s", getenv("PWD"));
 			setenv("PWD", argv[1], 1);
 		}
@@ -144,10 +160,10 @@ void cd(int argc, char **argv){
 }
 
 int main(int argc, char **argv){
-	printf("PWD: %s\n", getenv("PWD"));
+	//printf("PWD: %s\n", getenv("PWD"));
 	//cd();
-	char chemin[PATH_MAX] = "fiubbukvd/dfdtstbdtebtb/drdtrbtstbbtd/sdtdtstdstb";
-	/*char nom_dossier[PATH_MAX];
+	/*char chemin[PATH_MAX] = "fiubbukvd/dfdtstbdtebtb/drdtrbtstbbtd/sdtdtstdstb";
+	char nom_dossier[PATH_MAX];
 	printf("chemin: %s\n", chemin);
 	prochain_dossier(nom_dossier, chemin);
 	printf("prochain_dossier: %s\n", nom_dossier);
@@ -158,4 +174,7 @@ int main(int argc, char **argv){
 	printf("Dossier courant: %s\n", getenv("PWD"));
 	cd(argc-1, argv+1);
 	printf("Dossier courant: %s\n", getenv("PWD"));
+	/*char b[PATH_MAX] = "jkbklklbjlkjblk";
+	enlever_premier_dossier(b);
+	printf("%s\n", b);*/
 }
