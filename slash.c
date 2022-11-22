@@ -58,9 +58,7 @@ void cd(int argc, char **argv){
 			perror(NULL);
 			exit(1);
 		}
-		else{
-			close(fd);
-		}
+		close(fd);
 		setenv("PWD", getenv("HOME"), 1);
 	}
 	else if(argc == 1 && strcmp(argv[0],"-")==0){
@@ -70,9 +68,7 @@ void cd(int argc, char **argv){
 			perror(NULL);
 			exit(1);
 		}
-		else{
-			close(fd);
-		}
+		close(fd);
 		char tmp[PATH_MAX];
 		sprintf(tmp, "%s", dernier_sym);
 		sprintf(dernier_sym, "%s", getenv("PWD"));
@@ -87,39 +83,32 @@ void cd(int argc, char **argv){
 			sprintf(param, "%s", argv[1]);
 		}
 		//chemin interprété de manière logique
-		//si la référence logique n'a pas de sens, l'interpréter de manière physique
+		//TODO: si la référence logique n'a pas de sens, l'interpréter de manière physique
 		if(param[0]=='/'){
 			int fd = open(param, O_RDONLY, 0666);
 			if(fd < 0){
 				perror(NULL);
 				exit(1);
 			}
-			else{
-				close(fd);
-			}
+			close(fd);
 			sprintf(dernier_sym, "%s", getenv("PWD"));
 			setenv("PWD", param, 1);
 		}
 		else{
+			int fd = open(getenv("PWD"), O_RDONLY, 0666);
+			if(fd < 0){
+				perror(NULL);
+				exit(1);
+			}
 			//stocke le nouveau chemin symbolique. Il sera écrit dans la variable "pwd" si le chemin est valide
 			char tmp[PATH_MAX];
 			//premier dossier dans le chemin à parcourir
 			char * nom_dossier[PATH_MAX];
 			//copie de la valeur de "$PWD" dans "tmp"
 			sprintf(tmp, "%s", getenv("PWD"));
-			int fd = open(getenv("PWD"), O_RDONLY, 0666);
-			if(fd < 0){
-				perror(NULL);
-				exit(1);
-			}
 			while(param[0]!='\0'){
 				char nom_dossier[PATH_MAX];
-				//insertion du nom du prochain dossier à parcourir dans nom_dossier
-				//printf("\n");
 				prochain_dossier(nom_dossier, param);
-				/*printf("tmp: %s\n", tmp);
-				printf("param: %s\n", param);
-				printf("nom_dossier: %s\n", nom_dossier);*/
 				if(strcmp(nom_dossier, "..") == 0){
 					if(strcmp(tmp, "/") == 0){
 						perror(NULL);
@@ -174,9 +163,7 @@ void cd(int argc, char **argv){
 				perror(NULL);
 				exit(1);
 			}
-			else{
-				close(fd);
-			}
+			close(fd);
 			sprintf(dernier_sym, "%s", getenv("PWD"));
 			setenv("PWD", argv[1], 1);
 		}
