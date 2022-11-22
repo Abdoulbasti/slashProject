@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 char dernier_sym[PATH_MAX] = "\0";
 
@@ -52,25 +53,25 @@ void cd(int argc, char **argv){
 		sprintf(dernier_sym, "%s", getenv("PWD"));
 	}
 	if(argc == 0){
-		DIR * dir = opendir(getenv("HOME"));
-		if(dir == NULL){
-			perror("erreur ouverture dossier ~");
+		int fd = open(getenv("HOME"), O_RDONLY, 0666);
+		if(fd < 0){
+			perror(NULL);
 			exit(1);
 		}
 		else{
-			closedir(dir);
+			close(fd);
 		}
 		setenv("PWD", getenv("HOME"), 1);
 	}
 	else if(argc == 1 && strcmp(argv[0],"-")==0){
 		//ouvre le dernier répertoire puis échange les deux chemins symboliques
-		DIR * courant = opendir(dernier_sym);
-		if(courant == NULL){
-			perror("erreur ouverture dossier");
+		int fd = open(dernier_sym, O_RDONLY, 0666);
+		if(fd < 0){
+			perror(NULL);
 			exit(1);
 		}
 		else{
-			closedir(courant);
+			close(fd);
 		}
 		char tmp[PATH_MAX];
 		sprintf(tmp, "%s", dernier_sym);
@@ -88,13 +89,13 @@ void cd(int argc, char **argv){
 		//chemin interprété de manière logique
 		//si la référence logique n'a pas de sens, l'interpréter de manière physique
 		if(param[0]=='/'){
-			DIR * d = opendir(param);
-			if(d == NULL){
-				perror("le chemin n'existe pas");
+			int fd = open(param, O_RDONLY, 0666);
+			if(fd < 0){
+				perror(NULL);
 				exit(1);
 			}
 			else{
-				closedir(d);
+				close(fd);
 			}
 			sprintf(dernier_sym, "%s", getenv("PWD"));
 			setenv("PWD", param, 1);
@@ -106,20 +107,34 @@ void cd(int argc, char **argv){
 			char * nom_dossier[PATH_MAX];
 			//copie de la valeur de "$PWD" dans "tmp"
 			sprintf(tmp, "%s", getenv("PWD"));
+			int fd = open(getenv("PWD"), O_RDONLY, 0666);
+			if(fd < 0){
+				perror(NULL);
+				exit(1);
+			}
 			while(param[0]!='\0'){
 				char nom_dossier[PATH_MAX];
 				//insertion du nom du prochain dossier à parcourir dans nom_dossier
-				printf("\n");
+				//printf("\n");
 				prochain_dossier(nom_dossier, param);
-				printf("tmp: %s\n", tmp);
+				/*printf("tmp: %s\n", tmp);
 				printf("param: %s\n", param);
-				printf("nom_dossier: %s\n", nom_dossier);
-				if(strcmp(nom_dossier, "..")==0){
-					if(strcmp(tmp, "/")==0){
-						perror("chemin incorrect");
+				printf("nom_dossier: %s\n", nom_dossier);*/
+				if(strcmp(nom_dossier, "..") == 0){
+					if(strcmp(tmp, "/") == 0){
+						perror(NULL);
 						exit(1);
 					}
 					else{
+						int fd_sous = openat(fd, nom_dossier, O_RDONLY,  0666);
+						if(fd_sous < 0){
+							perror(NULL);
+							exit(1);
+						}
+						else{
+							close(fd);
+							fd = fd_sous;
+						}
 						enlever_premier_dossier(param);
 						enlever_dernier_dossier(tmp);
 					}
@@ -132,14 +147,16 @@ void cd(int argc, char **argv){
 					strcat(tmp, "/");
 					strcat(tmp, nom_dossier);
 
-					DIR * d = opendir(tmp);
-					if(d == NULL){
-						perror("répertoire inexistant");
+					int fd_sous = openat(fd, nom_dossier, O_RDONLY,  0666);
+					if(fd_sous < 0){
+						perror(NULL);
 						exit(1);
 					}
 					else{
-						closedir(d);
+						close(fd);
+						fd = fd_sous;
 					}
+
 					enlever_premier_dossier(param);
 				}
 			}
@@ -152,14 +169,13 @@ void cd(int argc, char **argv){
 		//naviguer à travers les répertoires sans avoir besoin de gérer de string. Appeler pwd à la fin 
 		//comment ne pas ouvrir les inoeuds? 
 		if(argv[1][0]=='/'){
-			//ouvrir le dossier "/"
-			//faire une boucle comme dans l'interprétation symbolique en vérifiant les répertoires à chaque fois
-			DIR * d = opendir(argv[2]);
-			if(d == NULL){
-				perror("le chemin n'existe pas");
+			int fd = open(argv[2], O_RDONLY, 0666);
+			if(fd < 0){
+				perror(NULL);
+				exit(1);
 			}
 			else{
-				closedir(d);
+				close(fd);
 			}
 			sprintf(dernier_sym, "%s", getenv("PWD"));
 			setenv("PWD", argv[1], 1);
