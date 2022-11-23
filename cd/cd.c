@@ -54,7 +54,7 @@ int cd(int argc, char **argv){
 		int fd = open(getenv("HOME"), O_RDONLY, 0666);
 		if(fd < 0){
 			perror(NULL);
-			exit(1);
+			return 1;
 		}
 		close(fd);
 		setenv("PWD", getenv("HOME"), 1);
@@ -64,7 +64,7 @@ int cd(int argc, char **argv){
 		int fd = open(dernier_sym, O_RDONLY, 0666);
 		if(fd < 0){
 			perror(NULL);
-			exit(1);
+			return 1;
 		}
 		close(fd);
 		char tmp[PATH_MAX];
@@ -83,27 +83,28 @@ int cd(int argc, char **argv){
 		}
 		//stocke le nouveau chemin symbolique. Il sera écrit dans la variable "pwd" si il est valide
 		char tmp[PATH_MAX];
+		tmp[0] = '\0';
 
 		//ouverture du dossier à partir duquel le parcours sera effectué
 		int fd;
 		//si c'est une référence relative, le parcours commence par le répertoire de travail
-		if(param[0] != '/'){
-			fd = open(getenv("PWD"), O_RDONLY, 0666);
-			if(fd < 0){
-				perror(NULL);
-				exit(1);
-			}
-			//comme le parcours commence par le répertoire de travail courant, c'est la valeur de $PWD qui est copiée dans tmp
-			sprintf(tmp, "%s", getenv("PWD"));
-		}
-		else{
+		if(param[0] == '/'){
 			fd = open("/", O_RDONLY, 0666);
 			if(fd < 0){
 				perror(NULL);
-				exit(1);
+				return 1;
 			}
 			//on enlève le premier "/" de param
 			enlever_premier_dossier(param);
+		}
+		else{
+			fd = open(getenv("PWD"), O_RDONLY, 0666);
+			if(fd < 0){
+				perror(NULL);
+				return 1;
+			}
+			//comme le parcours commence par le répertoire de travail courant, c'est la valeur de $PWD qui est copiée dans tmp
+			sprintf(tmp, "%s", getenv("PWD"));
 		}
 		
 		//nom du premier dossier dans le chemin à parcourir
@@ -115,8 +116,8 @@ int cd(int argc, char **argv){
 
 			int fd_sous = openat(fd, nom_dossier, O_RDONLY,  0666);
 			if(fd_sous < 0){
-				char * nargv[] = {"cd", "-P", param};
-				return cd(3, nargv);
+				char * nargv[] = {"-P", param};
+				return cd(2, nargv);
 			}
 			else{
 				close(fd);
@@ -144,21 +145,21 @@ int cd(int argc, char **argv){
 		int fd;
 		//ouverture du dossier à partir duquel le parcours sera effectué
 		//si c'est une référence relative, le parcours commence par le répertoire de travail
-		if(param[0] != '/'){
-			fd = open(getenv("PWD"), O_RDONLY, 0666);
-			if(fd < 0){
-				perror(NULL);
-				exit(1);
-			}
-		}
-		else{
+		if(param[0] == '/'){
 			fd = open("/", O_RDONLY, 0666);
 			if(fd < 0){
 				perror(NULL);
-				exit(1);
+				return 1;
 			}
 			//on enlève le premier "/" de param
 			enlever_premier_dossier(param);
+		}
+		else{
+			fd = open(getenv("PWD"), O_RDONLY, 0666);
+			if(fd < 0){
+				perror(NULL);
+				return 1;
+			}
 		}
 		
 		//nom du premier dossier dans le chemin à parcourir
@@ -170,8 +171,8 @@ int cd(int argc, char **argv){
 			
 			int fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW,  0666);
 			if(fd_sous < 0){
-				perror("refus d'ouvrir un lien symbolique avec l'option \"-P\"");
-				exit(1);
+				perror(NULL);
+				return 1;
 			}
 			else{
 				close(fd);
@@ -190,7 +191,7 @@ int cd(int argc, char **argv){
 	}
 	else{
 		//afficher les instruction d'utilisation
-		exit(1);
+		return 1;
 	}
 	return 0;
 
