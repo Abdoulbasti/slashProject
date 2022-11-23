@@ -51,7 +51,7 @@ int cd(int argc, char **argv){
 		sprintf(dernier_sym, "%s", getenv("PWD"));
 	}
 	if(argc == 0){
-		int fd = open(getenv("HOME"), O_RDONLY, 0666);
+		int fd = open(getenv("HOME"), O_RDONLY|O_DIRECTORY, 0666);
 		if(fd < 0){
 			perror(NULL);
 			return 1;
@@ -61,7 +61,7 @@ int cd(int argc, char **argv){
 	}
 	else if(argc == 1 && strcmp(argv[0],"-")==0){
 		//ouvre le dernier répertoire puis échange les deux chemins symboliques
-		int fd = open(dernier_sym, O_RDONLY, 0666);
+		int fd = open(dernier_sym, O_RDONLY|O_DIRECTORY, 0666);
 		if(fd < 0){
 			perror(NULL);
 			return 1;
@@ -89,7 +89,7 @@ int cd(int argc, char **argv){
 		int fd;
 		//si c'est une référence relative, le parcours commence par le répertoire de travail
 		if(param[0] == '/'){
-			fd = open("/", O_RDONLY, 0666);
+			fd = open("/", O_RDONLY|O_DIRECTORY, 0666);
 			if(fd < 0){
 				perror(NULL);
 				return 1;
@@ -98,7 +98,7 @@ int cd(int argc, char **argv){
 			enlever_premier_dossier(param);
 		}
 		else{
-			fd = open(getenv("PWD"), O_RDONLY, 0666);
+			fd = open(getenv("PWD"), O_RDONLY|O_DIRECTORY, 0666);
 			if(fd < 0){
 				perror(NULL);
 				return 1;
@@ -114,7 +114,7 @@ int cd(int argc, char **argv){
 		while(param[0]!='\0'){
 			prochain_dossier(nom_dossier, param);
 
-			int fd_sous = openat(fd, nom_dossier, O_RDONLY,  0666);
+			int fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
 			if(fd_sous < 0){
 				char * nargv[] = {"-P", param};
 				return cd(2, nargv);
@@ -146,7 +146,7 @@ int cd(int argc, char **argv){
 		//ouverture du dossier à partir duquel le parcours sera effectué
 		//si c'est une référence relative, le parcours commence par le répertoire de travail
 		if(param[0] == '/'){
-			fd = open("/", O_RDONLY, 0666);
+			fd = open("/", O_RDONLY|O_DIRECTORY, 0666);
 			if(fd < 0){
 				perror(NULL);
 				return 1;
@@ -155,7 +155,7 @@ int cd(int argc, char **argv){
 			enlever_premier_dossier(param);
 		}
 		else{
-			fd = open(getenv("PWD"), O_RDONLY, 0666);
+			fd = open(getenv("PWD"), O_RDONLY|O_DIRECTORY, 0666);
 			if(fd < 0){
 				perror(NULL);
 				return 1;
@@ -169,7 +169,7 @@ int cd(int argc, char **argv){
 		while(param[0]!='\0'){
 			prochain_dossier(nom_dossier, param);
 			
-			int fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW,  0666);
+			int fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW|O_DIRECTORY,  0666);
 			if(fd_sous < 0){
 				perror(NULL);
 				return 1;
