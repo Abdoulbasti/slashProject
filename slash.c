@@ -5,7 +5,7 @@
 #include "pwd/pwd.h"
 #include "constant.h"
 
-char prompt_msg[30];        //Message du prompt
+char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
 char args[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN];    //arguments de la commande entrée dans le prompt
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
@@ -24,12 +24,13 @@ char* prompt_format(){
     //Dernière commande exécutée
     char last_return_value_str[4];
     sprintf(last_return_value_str, "%d", last_return_value);
+    char* first_color = "[";
     if(last_return_value != 0){
-        strcpy(prompt_msg, (const char*) "\033[91m");
+        first_color = "\033[91m[";
     }else{
-        strcpy(prompt_msg, (const char*) "\033[32m");
+        first_color = "\033[32m[";
     }
-    strcat(prompt_msg, (const char*) "[");
+    strcpy(prompt_msg, (const char*) first_color);
     strcat(prompt_msg, (const char*) last_return_value_str);
     strcat(prompt_msg, (const char*) "]");
 
@@ -47,8 +48,8 @@ char* prompt_format(){
     }else{
         strcat(prompt_msg, (const char*) chemin_sym);
     }
-    strcat(prompt_msg, (const char*) "$ ");
     strcat(prompt_msg, (const char*) "\033[00m");
+    strcat(prompt_msg, (const char*) "$ ");
     return prompt_msg;
 }
 
@@ -133,8 +134,11 @@ int interpretation_command(int argc){
         last_return_value = pwd(argc, args);
     }
 
-
-    //valeur de retour
+    //Commande introuvable
+    char error_msg[100];
+    strcpy(error_msg, (const char*) command);
+    strcat(error_msg, (const char*) " : command not found");
+    print_error(error_msg);
     return last_return_value;
 }
 
