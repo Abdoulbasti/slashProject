@@ -53,26 +53,33 @@ int pwdForL()
 
 
 
-int pwd(char* args)
+int pwd(int argc, char argv[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN])
 {
-	int last_return_value = 1;
-    
-	//Commande pwd
-    if (strcmp(args, "-P") == 0)
-    {
-        last_return_value = pwdForP();
-        //return last_return_value;
-    }
-    //Cas par defaut, cas d'un lien logique
-    else if (strcmp(args, "-L") == 0 || strcmp(args, "")==0)
-    {
-        last_return_value = pwdForL();
-        //return last_return_value;
-    }
-    else
-    {
-        printError("pwd: wrong argument");
-        last_return_value = 1;
-    }
+	int last_return_value = -1;
+    switch (argc){
+	case 0:
+		//Sans arguments
+		last_return_value = pwdForL();
+		break;
+	case 1:
+		//argument '-p'
+		if(strcmp((const char*)argv[0], (const char*)"-P") == 0){
+        	last_return_value = pwdForP();
+        	//return last_return_value;
+    	}else if (strcmp((const char*)argv[0], (const char*)"-L") == 0){	//argument '-L'
+			last_return_value = pwdForL();
+			//return last_return_value;
+		}
+		else{	//argument invalide
+			printError("pwd: wrong argument");
+			last_return_value = -1;
+		}
+		break;
+	default:
+		//trop d'arguments
+		printError("pwd: too many arguments");
+		return -1;
+	}
+
     return last_return_value;
 }
