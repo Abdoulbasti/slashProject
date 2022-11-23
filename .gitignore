@@ -1,2 +1,12 @@
 .vscode
 slash
+.sy5-2022-2023-projet-slash-autotests.nosync
+..gitignore.swp
+*.o
+projet.md
+src/
+AUTHORS.md
+addendum-erratum.md
+include/
+equipes.md
+test.sh
