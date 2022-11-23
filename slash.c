@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 
 char dernier_sym[PATH_MAX] = "\0";
 
@@ -74,6 +73,17 @@ void cd(int argc, char **argv){
 		sprintf(dernier_sym, "%s", getenv("PWD"));
 		setenv("PWD", tmp, 1);
 	}
+
+
+
+	//la boucle doit être la même. C'est l'ouverture du fichier au départ qui doit être différente
+	//comment séparer les cas physique/symbolique?
+	//
+
+
+
+
+
 	else if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
 		char param[PATH_MAX];
 		if(argc == 1){
@@ -84,58 +94,46 @@ void cd(int argc, char **argv){
 		}
 		//chemin interprété de manière logique
 		//TODO: si la référence logique n'a pas de sens, l'interpréter de manière physique
+
+		//stocke le nouveau chemin symbolique. Il sera écrit dans la variable "pwd" si il est valide
+		char tmp[PATH_MAX];
+
+		//ouverture du dossier à partir duquel le parcours sera effectué
+		int fd;
+		//si c'est une référence absolue (chemin commençant par "/"), le parcours commence à la racine
 		if(param[0]=='/'){
-			int fd = open(param, O_RDONLY, 0666);
+			fd = open("/", O_RDONLY, 0666);
 			if(fd < 0){
 				perror(NULL);
 				exit(1);
 			}
-			close(fd);
-			sprintf(dernier_sym, "%s", getenv("PWD"));
-			setenv("PWD", param, 1);
+			//en enlève le premier "/" de "param"
+			enlever_premier_dossier(param);
 		}
+		//si c'est une référence relative, le parcours commence par le répertoire de travail
 		else{
-			int fd = open(getenv("PWD"), O_RDONLY, 0666);
+			fd = open(getenv("PWD"), O_RDONLY, 0666);
 			if(fd < 0){
 				perror(NULL);
 				exit(1);
 			}
-			//stocke le nouveau chemin symbolique. Il sera écrit dans la variable "pwd" si le chemin est valide
-			char tmp[PATH_MAX];
-			//premier dossier dans le chemin à parcourir
-			char * nom_dossier[PATH_MAX];
-			//copie de la valeur de "$PWD" dans "tmp"
+			//comme le parcours commence par le répertoire de travail courant, c'est la valeur de $PWD qui est copiée dans tmp
 			sprintf(tmp, "%s", getenv("PWD"));
-			while(param[0]!='\0'){
-				char nom_dossier[PATH_MAX];
-				prochain_dossier(nom_dossier, param);
-				if(strcmp(nom_dossier, "..") == 0){
-					if(strcmp(tmp, "/") == 0){
-						perror(NULL);
-						exit(1);
-					}
-					else{
-						int fd_sous = openat(fd, nom_dossier, O_RDONLY,  0666);
-						if(fd_sous < 0){
-							perror(NULL);
-							exit(1);
-						}
-						else{
-							close(fd);
-							fd = fd_sous;
-						}
-						enlever_premier_dossier(param);
-						enlever_dernier_dossier(tmp);
-					}
-				}
-				else if(strcmp(nom_dossier, ".")==0){
-					enlever_premier_dossier(param);
+		}
+		
+		//premier dossier dans le chemin à parcourir
+		char nom_dossier[PATH_MAX];
+		while(param[0]!='\0'){
+			prochain_dossier(nom_dossier, param);
+			printf("tmp: %s\n", tmp);
+			printf("param: %s\n", param);
+			printf("nom_dossier: %s\n", nom_dossier);
+			if(strcmp(nom_dossier, "..") == 0){
+				if(strcmp(tmp, "/") == 0){
+					perror(NULL);
+					exit(1);
 				}
 				else{
-					//ajout du répertoire courant à la fin de tmp
-					strcat(tmp, "/");
-					strcat(tmp, nom_dossier);
-
 					int fd_sous = openat(fd, nom_dossier, O_RDONLY,  0666);
 					if(fd_sous < 0){
 						perror(NULL);
@@ -145,14 +143,34 @@ void cd(int argc, char **argv){
 						close(fd);
 						fd = fd_sous;
 					}
-
 					enlever_premier_dossier(param);
+					enlever_dernier_dossier(tmp);
 				}
 			}
-			sprintf(dernier_sym, "%s", getenv("PWD"));
-			setenv("PWD", tmp, 1);
-		}
+			else if(strcmp(nom_dossier, ".")==0){
+				enlever_premier_dossier(param);
+			}
+			else{
+				//ajout du répertoire courant à la fin de tmp
+				strcat(tmp, "/");
+				strcat(tmp, nom_dossier);
 
+				int fd_sous = openat(fd, nom_dossier, O_RDONLY,  0666);
+				if(fd_sous < 0){
+					perror(NULL);
+					exit(1);
+				}
+				else{
+					close(fd);
+					fd = fd_sous;
+				}
+
+				enlever_premier_dossier(param);
+			}
+		}
+		close(fd);
+		sprintf(dernier_sym, "%s", getenv("PWD"));
+		setenv("PWD", tmp, 1);
 	}
 	else if(argc == 2 && strcmp(argv[0],"-P")==0){
 		//naviguer à travers les répertoires sans avoir besoin de gérer de string. Appeler pwd à la fin 
