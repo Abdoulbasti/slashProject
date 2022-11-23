@@ -85,7 +85,7 @@ int split_line(char* line){
     while(tmp != NULL){
         if(i != 0){
             //on ajoute un argument
-            strcpy(args[i-1], (const char*) tmp);
+            args[i-1] = tmp;
         }
         tmp = strtok(NULL, " ");    //découpe la partie avant le première espace
         i++;
@@ -133,11 +133,11 @@ int interpretation_command(int argc){
     }else
     //Commande pwd
     if(strcmp((const char*) command, (const char*) "pwd") == 0){
-        last_return_value = pwd(argc, args);
+        return pwd(argc, args);
     }else
     //Comande cd
     if(strcmp((const char*) command, (const char*) "cd") == 0){
-        last_return_value = cd(argc, args);
+        return cd(argc, args);
     }
     
     //Commande introuvable
