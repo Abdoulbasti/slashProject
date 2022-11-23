@@ -1,9 +1,4 @@
 #include "pwd.h"
-#include <limits.h>
-#include <sys/stat.h>
-
-#define MAX_ARGS_NUMBER 4096
-#define MAX_ARGS_STRLEN 4096
 
 /*
 Fonctions et autres choses utiles :
@@ -36,13 +31,13 @@ int pwdForP()
 	char pwd[MAX_ARGS_STRLEN];
 	if (getcwd(pwd, sizeof(pwd)) == NULL)
 	{
-		perror("error getwcd ");
+		printError("error getwcd ");
 		return 1;
 	}
 	else 
 	{
-		printf("%s\n", pwd);
-
+		write(STDOUT_FILENO, pwd, strlen(pwd));
+		write(STDOUT_FILENO, "\n", 1);
 		return 0;
 	}
 }
@@ -55,12 +50,13 @@ int pwdForL()
 	char* pwd = getenv("PWD");
 	if(pwd==NULL)
 	{
-		perror("getenv error ");
+		printError("getenv error ");
 		return 1;
 	}
 	else 
 	{
-		printf("%s\n", pwd);
+		write(STDOUT_FILENO, pwd, strlen(pwd));
+		write(STDOUT_FILENO, "\n", 1);
 		return 0;
 	}
 }
