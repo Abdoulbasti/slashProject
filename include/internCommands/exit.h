@@ -1,0 +1,1 @@
+//Ensembles des fonctions qui gère la commande exit
