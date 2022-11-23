@@ -5,6 +5,7 @@
 #include "cd/cd.h"
 #include "pwd/pwd.h"
 #include "constant.h"
+#include "cd/cd.h"
 
 char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -129,12 +130,16 @@ int interpretation_command(int argc){
             print_error("exit: too many arguments");
             return 1;
         }
-    }
+    }else
     //Commande pwd
     if(strcmp((const char*) command, (const char*) "pwd") == 0){
         last_return_value = pwd(argc, args);
+    }else
+    //Comande cd
+    if(strcmp((const char*) command, (const char*) "cd") == 0){
+        last_return_value = cd(argc, args);
     }
-
+    
     //Commande introuvable
     char error_msg[100];
     strcpy(error_msg, (const char*) command);
