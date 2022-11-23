@@ -5,11 +5,13 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../constant.h"
 
-int est_racine();
 
-int construit_chemin();
+int pwd(int agrv, char argv[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN]);
 
 int pwdForP();
 
 int pwdForL();
+
+char* printError(char* error_msg);

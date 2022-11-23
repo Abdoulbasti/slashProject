@@ -2,10 +2,8 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
-#define MAX_ARGS_NUMBER 4096
-#define MAX_ARGS_STRLEN 4096
-#define MAX_PATH 1000
+#include "pwd/pwd.h"
+#include "constant.h"
 
 char prompt_msg[30];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -122,6 +120,14 @@ int interpretation_command(int argc){
             return 1;
         }
     }
+    //Commande pwd
+    if(strcmp((const char*) command, (const char*) "pwd") == 0){
+        last_return_value = pwd(argc, args);
+    }
+
+
+    //valeur de retour
+    return last_return_value;
 }
 
 int main(int argc, char **argv){
