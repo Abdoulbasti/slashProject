@@ -67,7 +67,7 @@ int pwdForL()
 
 
 
-int pwd(int argc, char argv[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN])
+int pwd(int argc, char** argv)
 {
 	int last_return_value = -1;
     switch (argc){

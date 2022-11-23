@@ -5,10 +5,11 @@
 #include "cd/cd.h"
 #include "pwd/pwd.h"
 #include "constant.h"
+#include "cd/cd.h"
 
 char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
-char args[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN];    //arguments de la commande entrée dans le prompt
+char* args[MAX_ARGS_NUMBER];    //arguments de la commande entrée dans le prompt
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
 char chemin_sym[MAX_PATH] = "/";    //Chemin relatif
 
@@ -84,7 +85,7 @@ int split_line(char* line){
     while(tmp != NULL){
         if(i != 0){
             //on ajoute un argument
-            strcpy(args[i-1], (const char*) tmp);
+            args[i-1] = tmp;
         }
         tmp = strtok(NULL, " ");    //découpe la partie avant le première espace
         i++;
@@ -115,26 +116,30 @@ int interpretation_command(int argc){
 
     //commande exit
     if(strcmp((const char*) command, (const char*) "exit") == 0){
+        int tmp_exit_value;
         switch (argc)
         {
         case 0:
             fexit(last_return_value);
             break;
         case 1:
-            int tmp;
-            sscanf(args[0], "%d", &tmp);
-            fexit(tmp);
+            sscanf((const char*) args[0], "%d", &tmp_exit_value);
+            fexit(tmp_exit_value);
             break;
         default:
             print_error("exit: too many arguments");
             return 1;
         }
-    }
+    }else
     //Commande pwd
     if(strcmp((const char*) command, (const char*) "pwd") == 0){
-        last_return_value = pwd(argc, args);
+        return pwd(argc, args);
+    }else
+    //Comande cd
+    if(strcmp((const char*) command, (const char*) "cd") == 0){
+        return cd(argc, args);
     }
-
+    
     //Commande introuvable
     char error_msg[100];
     strcpy(error_msg, (const char*) command);

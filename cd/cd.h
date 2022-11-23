@@ -4,7 +4,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdio.h>
+#include "../constant.h"
 
 void prochain_dossier(char * nom_dossier, char * chemin);
 
