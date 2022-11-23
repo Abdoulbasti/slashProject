@@ -8,7 +8,7 @@
 #include "../constant.h"
 
 
-int pwd(int agrv, char argv[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN]);
+int pwd(int agrv, char** argv);
 
 int pwdForP();
 

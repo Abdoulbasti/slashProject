@@ -9,7 +9,7 @@
 
 char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
-char args[MAX_ARGS_NUMBER][MAX_ARGS_STRLEN];    //arguments de la commande entrée dans le prompt
+char* args[MAX_ARGS_NUMBER];    //arguments de la commande entrée dans le prompt
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
 char chemin_sym[MAX_PATH] = "/";    //Chemin relatif
 
@@ -116,15 +116,15 @@ int interpretation_command(int argc){
 
     //commande exit
     if(strcmp((const char*) command, (const char*) "exit") == 0){
+        int tmp_exit_value;
         switch (argc)
         {
         case 0:
             fexit(last_return_value);
             break;
         case 1:
-            int tmp;
-            sscanf(args[0], "%d", &tmp);
-            fexit(tmp);
+            sscanf((const char*) args[0], "%d", &tmp_exit_value);
+            fexit(tmp_exit_value);
             break;
         default:
             print_error("exit: too many arguments");
