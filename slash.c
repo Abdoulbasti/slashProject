@@ -1,12 +1,5 @@
-#include <unistd.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include "pwd/pwd.h"
-
-#define MAX_ARGS_NUMBER 4096
-#define MAX_ARGS_STRLEN 4096
-#define MAX_PATH 1000
+#include "slash.h"
+#include "internCommands/pwd.h"
 
 char prompt_msg[30];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -101,6 +94,7 @@ void fexit(int val){
     puis renvoie la valeur de retour de la fonction
 */
 int interpretation_command(int argc){
+    int tmp;
     //aucune commande
     if (strcmp((const char*) command, (const char*) "") == 0){
         return last_return_value;
@@ -114,7 +108,7 @@ int interpretation_command(int argc){
             fexit(last_return_value);
             break;
         case 1:
-            int tmp;
+            //int tmp;
             sscanf(args[0], "%d", &tmp);
             fexit(tmp);
             break;
