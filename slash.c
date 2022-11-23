@@ -22,16 +22,23 @@ char chemin_sym[MAX_PATH] = "/";    //Chemin relatif
 char* prompt_format(){
 
     //Dernière commande exécutée
-    char tmp[3];
-    sprintf(tmp, "%d", last_return_value);
-    strcpy(prompt_msg, (const char*) "[");
-    strcat(prompt_msg, (const char*) tmp);
+    char last_return_value_str[4];
+    sprintf(last_return_value_str, "%d", last_return_value);
+    if(last_return_value != 0){
+        strcpy(prompt_msg, (const char*) "\033[91m");
+    }else{
+        strcpy(prompt_msg, (const char*) "\033[32m");
+    }
+    strcat(prompt_msg, (const char*) "[");
+    strcat(prompt_msg, (const char*) last_return_value_str);
     strcat(prompt_msg, (const char*) "]");
 
     //Chemin symbolique
+    strcat(prompt_msg, (const char*) "\033[34m");
+
     strcpy(chemin_sym, (const char*) getenv("PWD"));
     int len_chemin = strlen(chemin_sym);
-    int len_tmp = strlen(tmp);
+    int len_tmp = strlen(last_return_value_str);
     // + len_tmp = len last_return_value; + 4 []$' '
     if( len_chemin + len_tmp + 4 > 30){
         strcat(prompt_msg, (const char*) "...");
@@ -41,6 +48,7 @@ char* prompt_format(){
         strcat(prompt_msg, (const char*) chemin_sym);
     }
     strcat(prompt_msg, (const char*) "$ ");
+    strcat(prompt_msg, (const char*) "\033[00m");
     return prompt_msg;
 }
 
