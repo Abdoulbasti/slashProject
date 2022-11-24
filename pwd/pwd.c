@@ -77,7 +77,9 @@ int construit_chemin(char* chemin_symbolique, int setChemin){
 		DIR * dir_parent = opendir(current_file);
 
 		struct dirent * entry;
+		int i = 0;
 		while((entry = readdir(dir_parent))){
+			i++;
 			struct stat st2;
 
 			char chemin[PATH_MAX + sizeof(entry->d_name)];
@@ -94,8 +96,11 @@ int construit_chemin(char* chemin_symbolique, int setChemin){
 				sprintf(current_file, "%s", courant);
 			}
 		}
+		if(i == 0){
+			return -1;
+		}
 	}
-	if(setChemin){
+	if(setChemin != 0){
 		strcpy(chemin_symbolique, chemin_physique);
 	}
 	return 0;

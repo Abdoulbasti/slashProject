@@ -45,6 +45,7 @@ void enlever_dernier_dossier(char * chemin){
 }
 
 int cd(int argc, char **argv){
+	char * save_pwd = getenv("PWD");
 	if(argc == 0){
 		int fd = open(getenv("HOME"), O_RDONLY|O_DIRECTORY, 0666);
 		if(fd < 0){
@@ -52,7 +53,6 @@ int cd(int argc, char **argv){
 			return 1;
 		}
 		close(fd);
-		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", getenv("HOME"), 1);
 
 	}
@@ -66,7 +66,6 @@ int cd(int argc, char **argv){
 		close(fd);
 		char tmp[PATH_MAX];
 		sprintf(tmp, "%s", getenv("OLDPWD"));
-		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", tmp, 1);
 	}
 	
@@ -116,14 +115,20 @@ int cd(int argc, char **argv){
 			int fd_sous;
 			if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
 				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
-				//printf("%s\n", nom_dossier);
 			}
-			else{
-				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW|O_DIRECTORY,  0666);
+			else if(argc == 2 && strcmp(argv[0], "-P") == 0){
+				strcat(tmp, "/");
+				strcat(tmp, nom_dossier);
+				if(construit_chemin(tmp, 1) != 0 ){
+					perror("cd");
+					setenv("PWD", save_pwd, 1);
+					return 1;
+				}
 			}
 			if(fd_sous < 0){
 				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
-					char * nargv[] = {"-P", argv[1]};
+					char * nargv[] = {"-P", param};
+					printf("%s\n", param);
 					return cd(2, nargv);
 				}
 				else{
@@ -140,12 +145,6 @@ int cd(int argc, char **argv){
 				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
 					enlever_dernier_dossier(tmp);
 				}
-				else{
-					strcat(tmp, "/..");
-					if(construit_chemin(tmp, 1) !=0){
-						return 1;
-					}
-				}
 			}
 			else if(strcmp(nom_dossier, ".") != 0){
 				strcat(tmp, "/");
@@ -154,7 +153,6 @@ int cd(int argc, char **argv){
 			enlever_premier_dossier(param);
 		}
 		close(fd);
-		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", tmp, 1);
 	}
 
@@ -162,6 +160,6 @@ int cd(int argc, char **argv){
 		//afficher les instruction d'utilisation
 		return 1;
 	}
+	setenv("OLDPWD", save_pwd, 1);
 	return 0;
-
 }
