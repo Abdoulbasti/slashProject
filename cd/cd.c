@@ -153,11 +153,6 @@ int cd(int argc, char **argv){
 			enlever_premier_dossier(param);
 		}
 		close(fd);
-
-		//si il faut stocker le chemin physique dans "$PWD", appel de ../pwd/pwd.c/construit_chemin
-		if(!(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0))){
-			return construit_chemin(tmp, 1);
-		}
 		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", tmp, 1);
 	}
