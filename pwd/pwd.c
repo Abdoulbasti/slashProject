@@ -1,5 +1,6 @@
 #include "pwd.h"
 
+
 /*
 Fonctions et autres choses utiles :
     getcwd()
@@ -26,23 +27,23 @@ char* printError(char* error_msg){
 }
 
 
-char courant[PATH_MAX] =".";
-char chemin_physique[PATH_MAX]="";
+char courant[PATH_MAX];
+char chemin_physique[PATH_MAX];
 
 int est_racine(){
 	struct stat st;
-	char tmp[PATH_MAX + 4];
+	char tmp[PATH_MAX];
 	if(sprintf(tmp, "%s/..", courant) == -1){
 		perror("sprintf");
 	}
 
 	if(stat(courant, &st) == -1){
-		perror("stat");
+		perror("courant");
 	}
 
 	struct stat st2;
 	if(stat(tmp, &st2) == -1){
-		perror("stat");
+		perror("tmp");
 	}
 
 	if(st.st_ino == st2.st_ino && st.st_dev == st2.st_dev){
@@ -54,15 +55,16 @@ int est_racine(){
 
 }
 
-int construit_chemin(char* lien_symbolique, int setEnv){
+int construit_chemin(char* chemin_symbolique, int setEnv){
 	int n;
 	int d;
-	//On part de la fin, du lien symbolique
-	strcpy(courant, lien_symbolique);
+	chemin_physique[0] = '\0';
+	strcpy(courant, chemin_symbolique);
 	while(!est_racine()){
 		//on récupère l'ino, le périphérique et le nom du fichier courant
 		struct stat st;
 		if(stat(courant, &st) == -1){
+			perror(NULL);
 			return -1;
 		}
 
@@ -75,7 +77,7 @@ int construit_chemin(char* lien_symbolique, int setEnv){
 		while((entry = readdir(dir_parent))){
 			struct stat st2;
 
-			char chemin[PATH_MAX + sizeof(entry->d_name) + 4];
+			char chemin[PATH_MAX + sizeof(entry->d_name)];
 			sprintf(chemin, "%s/%s", current_file, entry->d_name);
 
 			lstat(chemin, &st2);
@@ -84,7 +86,7 @@ int construit_chemin(char* lien_symbolique, int setEnv){
 				//memmove(chemin_physique+strlen(chemin_physique), strcat(entry->d_name, "/"), strlen(entry->d_name)+1);
 
 				sprintf(courant, "%s", current_file);
-				sprintf(current_file, "%s/%s", entry->d_name, chemin_physique);
+				sprintf(current_file, "/%s%s", entry->d_name, chemin_physique);
 				sprintf(chemin_physique, "%s", current_file);
 				sprintf(current_file, "%s", courant);
 			}
@@ -102,8 +104,7 @@ int pwdForP(){
 		printError("pwd -P : Error");
 		return -1;
 	}
-	write(STDIN_FILENO, "/", 1);
-	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique) - 1);
+	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique));
 	write(STDIN_FILENO, "\n", 1);
 	return return_value;
 }

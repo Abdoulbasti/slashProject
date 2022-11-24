@@ -72,8 +72,10 @@ int cd(int argc, char **argv){
 		sprintf(dernier_sym, "%s", getenv("PWD"));
 		setenv("PWD", tmp, 1);
 	}
-	//chemin interprété de manière logique
-	else if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
+	
+	else if(argc == 1 || 
+		(argc == 2 && 
+			(strcmp(argv[0], "-L") == 0 || strcmp(argv[0], "-P") == 0) )){
 		char param[PATH_MAX];
 		if(argc == 1){
 			sprintf(param, "%s", argv[0]);
@@ -114,10 +116,22 @@ int cd(int argc, char **argv){
 		while(param[0]!='\0'){
 			prochain_dossier(nom_dossier, param);
 
-			int fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
+			int fd_sous;
+			if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
+				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
+			}
+			else{
+				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW|O_DIRECTORY,  0666);
+			}
 			if(fd_sous < 0){
-				char * nargv[] = {"-P", param};
-				return cd(2, nargv);
+				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
+					char * nargv[] = {"-P", param};
+					return cd(2, nargv);
+				}
+				else{
+					perror(NULL);
+					return 1;
+				}
 			}
 			else{
 				close(fd);
@@ -125,7 +139,16 @@ int cd(int argc, char **argv){
 			}
 
 			if(strcmp(nom_dossier, "..") == 0){
-				enlever_dernier_dossier(tmp);
+				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
+					enlever_dernier_dossier(tmp);
+				}
+				else{
+					strcat(tmp, "/..");
+					if(construit_chemin(tmp, 1) !=0){
+						return 1;
+					}
+					sprintf(tmp, "%s", getenv("PWD"));
+				}
 			}
 			else if(strcmp(nom_dossier, ".") != 0){
 				strcat(tmp, "/");
@@ -134,61 +157,19 @@ int cd(int argc, char **argv){
 			enlever_premier_dossier(param);
 		}
 		close(fd);
-		sprintf(dernier_sym, "%s", getenv("PWD"));
-		setenv("PWD", tmp, 1);
-	}
-	//chemin interprété de manière physique
-	else if(argc == 2 && strcmp(argv[0],"-P")==0){
-		char param[PATH_MAX];
-		sprintf(param, "%s", argv[1]);
 
-		int fd;
-		//ouverture du dossier à partir duquel le parcours sera effectué
-		//si c'est une référence relative, le parcours commence par le répertoire de travail
-		if(param[0] == '/'){
-			fd = open("/", O_RDONLY|O_DIRECTORY, 0666);
-			if(fd < 0){
-				perror(NULL);
-				return 1;
-			}
-			//on enlève le premier "/" de param
-			enlever_premier_dossier(param);
+		//il faut stocker le chemin symbolique dans "$PWD" tel quel
+		if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
+			sprintf(dernier_sym, "%s", getenv("PWD"));
+			setenv("PWD", tmp, 1);
 		}
+		//il faut stocker le chemin physique dans "$PWD"
+		//pour cela faire, appel de ../pwd/pwd.c/construit_chemin
 		else{
-			fd = open(getenv("PWD"), O_RDONLY|O_DIRECTORY, 0666);
-			if(fd < 0){
-				perror(NULL);
-				return 1;
-			}
+			return construit_chemin(tmp, 1);
 		}
-		
-		//nom du premier dossier dans le chemin à parcourir
-		char nom_dossier[PATH_MAX];
-
-		//boucle de parcours
-		while(param[0]!='\0'){
-			prochain_dossier(nom_dossier, param);
-			
-			int fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW|O_DIRECTORY,  0666);
-			if(fd_sous < 0){
-				perror(NULL);
-				return 1;
-			}
-			else{
-				close(fd);
-				fd = fd_sous;
-			}
-			enlever_premier_dossier(param);
-		}
-		sprintf(dernier_sym, "%s", getenv("PWD"));
-		//une fois le dossier ouvert, appel de la fonction "pwd" qui mettra à jour la variable d'environement
-		
-		//cette fonction n'existe pas. Elle prendra en paramètre le descripteur de fichier du dossier actuel?
-		//TODO: ECRIRE CETTE FONCTION
-		//pwd(fd);
-		close(fd);
-
 	}
+
 	else{
 		//afficher les instruction d'utilisation
 		return 1;

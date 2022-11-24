@@ -153,7 +153,6 @@ int interpretation_command(int argc){
 int main(int argc, char **argv){
     char* line = (char*)NULL;
     rl_outstream = stderr;  //changement de la sortie vers la sortie d'erreur
-    construit_chemin("/home/julien/Documents/S5/test/lien/..", 1);
     while(1){
         //affiche le prompt et attend l'utilisateur
         line = readline(prompt_format());
