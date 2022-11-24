@@ -35,15 +35,18 @@ int est_racine(){
 	char tmp[PATH_MAX];
 	if(sprintf(tmp, "%s/..", courant) == -1){
 		perror("sprintf");
+		return -1;
 	}
 
 	if(stat(courant, &st) == -1){
-		perror("courant");
+		perror("pwd");
+		return -1;
 	}
 
 	struct stat st2;
 	if(stat(tmp, &st2) == -1){
-		perror("tmp");
+		perror("pwd");
+		return -1;
 	}
 
 	if(st.st_ino == st2.st_ino && st.st_dev == st2.st_dev){

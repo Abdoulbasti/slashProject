@@ -116,13 +116,14 @@ int cd(int argc, char **argv){
 			int fd_sous;
 			if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
 				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
+				//printf("%s\n", nom_dossier);
 			}
 			else{
 				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW|O_DIRECTORY,  0666);
 			}
 			if(fd_sous < 0){
 				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
-					char * nargv[] = {"-P", param};
+					char * nargv[] = {"-P", argv[1]};
 					return cd(2, nargv);
 				}
 				else{
