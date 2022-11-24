@@ -26,12 +26,12 @@ char* printError(char* error_msg){
 }
 
 
-char courant[MAX_PATH] =".";
-char chemin_physique[MAX_PATH]="";
+char courant[PATH_MAX] =".";
+char chemin_physique[PATH_MAX]="";
 
 int est_racine(){
 	struct stat st;
-	char tmp[MAX_PATH + 4];
+	char tmp[PATH_MAX + 4];
 	if(sprintf(tmp, "%s/..", courant) == -1){
 		perror("sprintf");
 	}
@@ -57,37 +57,36 @@ int est_racine(){
 int construit_chemin(char* lien_symbolique, int setEnv){
 	int n;
 	int d;
+	//On part de la fin, du lien symbolique
 	strcpy(courant, lien_symbolique);
 	while(!est_racine()){
+		//on récupère l'ino, le périphérique et le nom du fichier courant
 		struct stat st;
 		if(stat(courant, &st) == -1){
 			return -1;
 		}
-		n = st.st_ino;
-		d = st.st_dev;
 
-		char suivant[MAX_PATH + 4];
-		sprintf(suivant, "%s/..", courant);
+		char current_file[PATH_MAX];
+		sprintf(current_file, "%s/..", courant);
 
-		DIR * dir_parent = opendir(suivant);
+		DIR * dir_parent = opendir(current_file);
 
 		struct dirent * entry;
 		while((entry = readdir(dir_parent))){
 			struct stat st2;
 
-			char chemin[MAX_PATH + sizeof(entry->d_name) + 4];
-			sprintf(chemin, "%s/%s", suivant, entry->d_name);
+			char chemin[PATH_MAX + sizeof(entry->d_name) + 4];
+			sprintf(chemin, "%s/%s", current_file, entry->d_name);
 
 			lstat(chemin, &st2);
 
 			if(st2.st_ino == st.st_ino && st2.st_dev == st.st_dev){
 				//memmove(chemin_physique+strlen(chemin_physique), strcat(entry->d_name, "/"), strlen(entry->d_name)+1);
 
-				sprintf(courant, "%s", suivant);
-				sprintf(suivant, "%s/%s", entry->d_name, chemin_physique);
-				sprintf(chemin_physique, "%s", suivant);
-				sprintf(suivant, "%s", courant);
-				//printf("%s\n", suivant);
+				sprintf(courant, "%s", current_file);
+				sprintf(current_file, "%s/%s", entry->d_name, chemin_physique);
+				sprintf(chemin_physique, "%s", current_file);
+				sprintf(current_file, "%s", courant);
 			}
 		}
 	}

@@ -1,3 +1,2 @@
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
-#define MAX_PATH 1000
