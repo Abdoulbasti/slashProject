@@ -158,6 +158,6 @@ int main(int argc, char **argv){
         add_history(line);
 
         int nb_args = split_line(line);
-        last_return_value = interpretation_command(nb_args);
+        last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
     }
 }

@@ -31,20 +31,15 @@ char chemin_physique[MAX_PATH]="";
 
 char* nom_du_repertoire(){
 	struct stat st;
-	/*if(stat(courant, &st) == -1){
-		perror("erreur stat dossier courant\n");
+	if(stat(courant, &st) == -1){
+		return NULL;
 	}
 	//ouvrir le dossier parent 
 	char dossier_parent[MAX_PATH];
 	sprintf(dossier_parent, "%s/..", courant);
-	DIR * parent = opendir(dossier_parent);*/
-	if(stat(".", &st) == -1){
-		perror("erreur stat dossier courant\n");
-	}
-	//ouvrir le dossier parent 
-	DIR * parent = opendir("..");
+	DIR * parent = opendir(dossier_parent);
 	if(parent == NULL){
-		perror("erreur opendir dossier parent\n");
+		return NULL;
 	}
 	//parcourir le dossier parent en regardant les inoeuds des éléments contenus et en les comparant avec celui du dossier courant 
 	struct dirent * entry;
@@ -64,6 +59,7 @@ char* nom_du_repertoire(){
 			return entry->d_name;
 		}
 	}
+	printError("Err");
 	return NULL;
 }
 
@@ -134,7 +130,12 @@ int construit_chemin(){
 int pwdForP()
 {
 	int return_value = construit_chemin();
-	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique));
+	char* chemin_physique_tmp = nom_du_repertoire();
+	if(chemin_physique_tmp == NULL){
+		printError("pwd -P : Error");
+		return -1;
+	}
+	write(STDIN_FILENO, chemin_physique_tmp, strlen(chemin_physique_tmp));
 	write(STDIN_FILENO, "\n", 1);
 	return return_value;
 }
