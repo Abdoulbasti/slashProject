@@ -29,40 +29,6 @@ char* printError(char* error_msg){
 char courant[MAX_PATH] =".";
 char chemin_physique[MAX_PATH]="";
 
-char* nom_du_repertoire(){
-	struct stat st;
-	if(stat(courant, &st) == -1){
-		return NULL;
-	}
-	//ouvrir le dossier parent 
-	char dossier_parent[MAX_PATH];
-	sprintf(dossier_parent, "%s/..", courant);
-	DIR * parent = opendir(dossier_parent);
-	if(parent == NULL){
-		return NULL;
-	}
-	//parcourir le dossier parent en regardant les inoeuds des éléments contenus et en les comparant avec celui du dossier courant 
-	struct dirent * entry;
-	while((entry = readdir(parent))){
-		//on appelle stat pour chaque répertoire qu'on examine pour pouvoir comparer le numéro du volume
-		struct stat st2;
-
-		//string stoquant le chemin depuis le répertoire courant vers le répertoire examiné
-		char chemin[MAX_PATH];
-		sprintf(chemin, "../%s", entry->d_name);
-
-		//stat permet d'obtenir le numéro de volume du répertoire examiné
-		stat(chemin, &st2);
-
-		//pour que le répertoire examiné soit le même que le répertoire courant, il faut qu'il ait le même numéro d'inoeud et le même numéro de volume
-		if(st2.st_ino == st.st_ino && st2.st_dev == st.st_dev){
-			return entry->d_name;
-		}
-	}
-	printError("Err");
-	return NULL;
-}
-
 int est_racine(){
 	struct stat st;
 	char tmp[MAX_PATH + 4];
@@ -88,10 +54,10 @@ int est_racine(){
 
 }
 
-int construit_chemin(){
+int construit_chemin(char* lien_symbolique, int setEnv){
 	int n;
 	int d;
-	strcpy(courant, getenv("PWD"));
+	strcpy(courant, lien_symbolique);
 	while(!est_racine()){
 		struct stat st;
 		if(stat(courant, &st) == -1){
@@ -100,47 +66,45 @@ int construit_chemin(){
 		n = st.st_ino;
 		d = st.st_dev;
 
-		char tmp[MAX_PATH + 4];
-		sprintf(tmp, "%s/..", courant);
+		char suivant[MAX_PATH + 4];
+		sprintf(suivant, "%s/..", courant);
 
-		DIR * dir_parent = opendir(tmp);
+		DIR * dir_parent = opendir(suivant);
 
 		struct dirent * entry;
 		while((entry = readdir(dir_parent))){
 			struct stat st2;
 
 			char chemin[MAX_PATH + sizeof(entry->d_name) + 4];
-			sprintf(chemin, "%s/%s", tmp, entry->d_name);
+			sprintf(chemin, "%s/%s", suivant, entry->d_name);
 
-			stat(chemin, &st2);
+			lstat(chemin, &st2);
 
 			if(st2.st_ino == st.st_ino && st2.st_dev == st.st_dev){
 				//memmove(chemin_physique+strlen(chemin_physique), strcat(entry->d_name, "/"), strlen(entry->d_name)+1);
 
-				sprintf(courant, "%s", tmp);
-				sprintf(tmp, "%s/%s", entry->d_name, chemin_physique);
-				sprintf(chemin_physique, "%s", tmp);
-				sprintf(tmp, "%s", courant);
+				sprintf(courant, "%s", suivant);
+				sprintf(suivant, "%s/%s", entry->d_name, chemin_physique);
+				sprintf(chemin_physique, "%s", suivant);
+				sprintf(suivant, "%s", courant);
+				//printf("%s\n", suivant);
 			}
 		}
+	}
+	if(setEnv){
+		setenv("PWD", chemin_physique, 1);
 	}
 	return 0;
 }
 
-int pwdForP()
-{
-	// char* courant_tmp = nom_du_repertoire();
-	// if(courant_tmp == NULL){
-	// 	printError("pwd -P : Error can't find current dir");
-	// 	return -1;
-	// }
-	//strcpy(courant, courant_tmp);
-	int return_value = construit_chemin();
+int pwdForP(){
+	int return_value = construit_chemin(getenv("PWD"), 0);
 	if(return_value == -1){
 		printError("pwd -P : Error");
 		return -1;
 	}
-	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique));
+	write(STDIN_FILENO, "/", 1);
+	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique) - 1);
 	write(STDIN_FILENO, "\n", 1);
 	return return_value;
 }

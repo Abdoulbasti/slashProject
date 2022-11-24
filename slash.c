@@ -46,7 +46,7 @@ char* prompt_format(){
     if( len_chemin + len_tmp + 4 > 30){
         strcat(prompt_msg, (const char*) "...");
         // + len_tmp = taille last_return_value; + 7 = []...$' '; -31 = -30(taille max) -1 = taille vers indice
-        strcat(prompt_msg, (const char*) &chemin_sym[len_chemin - 31 + len_tmp + 7]);
+        strcat(prompt_msg, (const char*) &chemin_sym[len_chemin - 31 + len_tmp + 8]);
     }else{
         strcat(prompt_msg, (const char*) chemin_sym);
     }
