@@ -37,12 +37,14 @@ int est_racine(){
 	}
 
 	if(stat(courant, &st) == -1){
-		perror("stat");
+		printf("courant: %s\n", courant);
+		perror("courant");
 	}
 
 	struct stat st2;
 	if(stat(tmp, &st2) == -1){
-		perror("stat");
+		printf("tmp: %s\n", tmp);
+		perror("tmp");
 	}
 
 	if(st.st_ino == st2.st_ino && st.st_dev == st2.st_dev){
@@ -54,13 +56,14 @@ int est_racine(){
 
 }
 
-int construit_chemin(char* lien_symbolique, int setEnv){
+int construit_chemin(char* chemin_symbolique, int setEnv){
 	int n;
 	int d;
-	strcpy(courant, lien_symbolique);
+	strcpy(courant, chemin_symbolique);
 	while(!est_racine()){
 		struct stat st;
 		if(stat(courant, &st) == -1){
+			perror(NULL);
 			return -1;
 		}
 		n = st.st_ino;
