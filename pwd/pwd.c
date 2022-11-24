@@ -26,7 +26,7 @@ char* printError(char* error_msg){
 }
 
 
-char courant[MAX_PATH];
+char courant[MAX_PATH] =".";
 char chemin_physique[MAX_PATH]="";
 
 char* nom_du_repertoire(){
@@ -129,13 +129,18 @@ int construit_chemin(){
 
 int pwdForP()
 {
+	// char* courant_tmp = nom_du_repertoire();
+	// if(courant_tmp == NULL){
+	// 	printError("pwd -P : Error can't find current dir");
+	// 	return -1;
+	// }
+	//strcpy(courant, courant_tmp);
 	int return_value = construit_chemin();
-	char* chemin_physique_tmp = nom_du_repertoire();
-	if(chemin_physique_tmp == NULL){
+	if(return_value == -1){
 		printError("pwd -P : Error");
 		return -1;
 	}
-	write(STDIN_FILENO, chemin_physique_tmp, strlen(chemin_physique_tmp));
+	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique));
 	write(STDIN_FILENO, "\n", 1);
 	return return_value;
 }
