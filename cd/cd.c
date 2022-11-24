@@ -235,7 +235,13 @@ int cd(int argc, char **argv){
 		while(param[0]!='\0'){
 			prochain_dossier(nom_dossier, param);
 
-			int fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
+			int fd_sous;
+			if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
+				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
+			}
+			else{
+				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_NOFOLLOW|O_DIRECTORY,  0666);
+			}
 			if(fd_sous < 0){
 				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
 					char * nargv[] = {"-P", param};
@@ -256,9 +262,7 @@ int cd(int argc, char **argv){
 					enlever_dernier_dossier(tmp);
 				}
 				else{
-					printf("%s\n", tmp);
 					strcat(tmp, "/..");
-					printf("%s\n", tmp);
 					if(construit_chemin(tmp, 1) !=0){
 						return 1;
 					}

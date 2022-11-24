@@ -26,24 +26,22 @@ char* printError(char* error_msg){
 }
 
 
-char courant[MAX_PATH] =".";
-char chemin_physique[MAX_PATH]="";
+char courant[MAX_PATH];
+char chemin_physique[MAX_PATH];
 
 int est_racine(){
 	struct stat st;
-	char tmp[MAX_PATH + 4];
+	char tmp[MAX_PATH];
 	if(sprintf(tmp, "%s/..", courant) == -1){
 		perror("sprintf");
 	}
 
 	if(stat(courant, &st) == -1){
-		printf("courant: %s\n", courant);
 		perror("courant");
 	}
 
 	struct stat st2;
 	if(stat(tmp, &st2) == -1){
-		printf("tmp: %s\n", tmp);
 		perror("tmp");
 	}
 
@@ -59,6 +57,7 @@ int est_racine(){
 int construit_chemin(char* chemin_symbolique, int setEnv){
 	int n;
 	int d;
+	chemin_physique[0] = '\0';
 	strcpy(courant, chemin_symbolique);
 	while(!est_racine()){
 		struct stat st;
@@ -69,7 +68,7 @@ int construit_chemin(char* chemin_symbolique, int setEnv){
 		n = st.st_ino;
 		d = st.st_dev;
 
-		char suivant[MAX_PATH + 4];
+		char suivant[MAX_PATH];
 		sprintf(suivant, "/%s/..", courant);
 
 		DIR * dir_parent = opendir(suivant);
@@ -78,7 +77,7 @@ int construit_chemin(char* chemin_symbolique, int setEnv){
 		while((entry = readdir(dir_parent))){
 			struct stat st2;
 
-			char chemin[MAX_PATH + sizeof(entry->d_name) + 4];
+			char chemin[MAX_PATH + sizeof(entry->d_name)];
 			sprintf(chemin, "%s/%s", suivant, entry->d_name);
 
 			lstat(chemin, &st2);
