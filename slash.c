@@ -11,7 +11,7 @@ char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
 char* args[MAX_ARGS_NUMBER];    //arguments de la commande entrée dans le prompt
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
-char chemin_sym[MAX_PATH] = "/";    //Chemin relatif
+char chemin_sym[PATH_MAX] = "/";    //Chemin relatif
 
 
 /*
@@ -26,6 +26,8 @@ char* prompt_format(){
     //Dernière commande exécutée
     char last_return_value_str[4];
     sprintf(last_return_value_str, "%d", last_return_value);
+
+    //Couleur (vert: succès / rouge échec)
     char* first_color = "[";
     if(last_return_value != 0){
         first_color = "\033[91m[";
@@ -151,6 +153,7 @@ int interpretation_command(int argc){
 int main(int argc, char **argv){
     char* line = (char*)NULL;
     rl_outstream = stderr;  //changement de la sortie vers la sortie d'erreur
+    construit_chemin("/home/julien/Documents/S5/test/lien/..", 1);
     while(1){
         //affiche le prompt et attend l'utilisateur
         line = readline(prompt_format());
