@@ -30,7 +30,7 @@ char* printError(char* error_msg){
 char courant[PATH_MAX];
 char chemin_physique[PATH_MAX];
 
-int est_racine(){
+int est_racine(int setChemin){
 	struct stat st;
 	char tmp[PATH_MAX];
 	if(sprintf(tmp, "%s/..", courant) == -1){
@@ -39,13 +39,17 @@ int est_racine(){
 	}
 
 	if(stat(courant, &st) == -1){
-		perror("pwd");
+		if(setChemin == 0){
+			perror("pwd");
+		}
 		return -1;
 	}
 
 	struct stat st2;
 	if(stat(tmp, &st2) == -1){
-		perror("pwd");
+		if(setChemin == 0){
+			perror("pwd");
+		}
 		return -1;
 	}
 
@@ -63,7 +67,8 @@ int construit_chemin(char* chemin_symbolique, int setChemin){
 	int d;
 	chemin_physique[0] = '\0';
 	strcpy(courant, chemin_symbolique);
-	while(!est_racine()){
+	int return_value_est_racine;
+	while(!(return_value_est_racine = est_racine(setChemin))){
 		//on récupère l'ino, le périphérique et le nom du fichier courant
 		struct stat st;
 		if(stat(courant, &st) == -1){
@@ -99,6 +104,9 @@ int construit_chemin(char* chemin_symbolique, int setChemin){
 		if(i == 0){
 			return -1;
 		}
+	}
+	if(return_value_est_racine == -1){
+		return -1;
 	}
 	if(setChemin != 0){
 		strcpy(chemin_symbolique, chemin_physique);

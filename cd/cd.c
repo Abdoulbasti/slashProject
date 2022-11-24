@@ -127,9 +127,9 @@ int cd(int argc, char **argv){
 			}
 			if(fd_sous < 0){
 				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
-					char * nargv[] = {"-P", param};
-					printf("%s\n", param);
-					return cd(2, nargv);
+					strcpy(argv[0], "-P"); 
+					//char * nargv[] = {"-P", param};
+					return cd(2, argv);
 				}
 				else{
 					perror(NULL);
