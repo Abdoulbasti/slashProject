@@ -67,7 +67,7 @@ int construit_chemin(char* lien_symbolique, int setEnv){
 		d = st.st_dev;
 
 		char suivant[MAX_PATH + 4];
-		sprintf(suivant, "%s/..", courant);
+		sprintf(suivant, "/%s/..", courant);
 
 		DIR * dir_parent = opendir(suivant);
 
@@ -84,10 +84,9 @@ int construit_chemin(char* lien_symbolique, int setEnv){
 				//memmove(chemin_physique+strlen(chemin_physique), strcat(entry->d_name, "/"), strlen(entry->d_name)+1);
 
 				sprintf(courant, "%s", suivant);
-				sprintf(suivant, "%s/%s", entry->d_name, chemin_physique);
+				sprintf(suivant, "/%s%s", entry->d_name, chemin_physique);
 				sprintf(chemin_physique, "%s", suivant);
 				sprintf(suivant, "%s", courant);
-				//printf("%s\n", suivant);
 			}
 		}
 	}
@@ -103,8 +102,7 @@ int pwdForP(){
 		printError("pwd -P : Error");
 		return -1;
 	}
-	write(STDIN_FILENO, "/", 1);
-	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique) - 1);
+	write(STDIN_FILENO, chemin_physique, strlen(chemin_physique));
 	write(STDIN_FILENO, "\n", 1);
 	return return_value;
 }
