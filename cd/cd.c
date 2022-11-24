@@ -144,7 +144,6 @@ int cd(int argc, char **argv){
 					if(construit_chemin(tmp, 1) !=0){
 						return 1;
 					}
-					sprintf(tmp, "%s", getenv("PWD"));
 				}
 			}
 			else if(strcmp(nom_dossier, ".") != 0){
@@ -155,16 +154,12 @@ int cd(int argc, char **argv){
 		}
 		close(fd);
 
-		//il faut stocker le chemin symbolique dans "$PWD" tel quel
-		if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
-			setenv("OLDPWD", getenv("PWD"), 1);
-			setenv("PWD", tmp, 1);
-		}
-		//il faut stocker le chemin physique dans "$PWD"
-		//pour cela faire, appel de ../pwd/pwd.c/construit_chemin
-		else{
+		//si il faut stocker le chemin physique dans "$PWD", appel de ../pwd/pwd.c/construit_chemin
+		if(!(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0))){
 			return construit_chemin(tmp, 1);
 		}
+		setenv("OLDPWD", getenv("PWD"), 1);
+		setenv("PWD", tmp, 1);
 	}
 
 	else{

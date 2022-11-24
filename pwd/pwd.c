@@ -55,7 +55,7 @@ int est_racine(){
 
 }
 
-int construit_chemin(char* chemin_symbolique, int setEnv){
+int construit_chemin(char* chemin_symbolique, int setChemin){
 	int n;
 	int d;
 	chemin_physique[0] = '\0';
@@ -92,8 +92,8 @@ int construit_chemin(char* chemin_symbolique, int setEnv){
 			}
 		}
 	}
-	if(setEnv){
-		setenv("PWD", chemin_physique, 1);
+	if(setChemin){
+		strcpy(chemin_symbolique, chemin_physique);
 	}
 	return 0;
 }
