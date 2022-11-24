@@ -9,8 +9,6 @@
 #include "cd.h"
 #include "../pwd/pwd.h"
 
-char dernier_sym[PATH_MAX] = "\0";
-
 //insère dans "res" un string contenant les caractères jusqu'au premier "/" inclus de "chemin"
 void prochain_dossier(char * nom_dossier, char * chemin){
 	nom_dossier[0] = '\0';
@@ -47,9 +45,6 @@ void enlever_dernier_dossier(char * chemin){
 }
 
 int cd(int argc, char **argv){
-	if(strcmp(dernier_sym, "\0") == 0){
-		sprintf(dernier_sym, "%s", getenv("PWD"));
-	}
 	if(argc == 0){
 		int fd = open(getenv("HOME"), O_RDONLY|O_DIRECTORY, 0666);
 		if(fd < 0){
@@ -57,19 +52,21 @@ int cd(int argc, char **argv){
 			return 1;
 		}
 		close(fd);
+		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", getenv("HOME"), 1);
+
 	}
 	else if(argc == 1 && strcmp(argv[0],"-")==0){
 		//ouvre le dernier répertoire puis échange les deux chemins symboliques
-		int fd = open(dernier_sym, O_RDONLY|O_DIRECTORY, 0666);
+		int fd = open(getenv("OLDPWD"), O_RDONLY|O_DIRECTORY, 0666);
 		if(fd < 0){
 			perror(NULL);
 			return 1;
 		}
 		close(fd);
 		char tmp[PATH_MAX];
-		sprintf(tmp, "%s", dernier_sym);
-		sprintf(dernier_sym, "%s", getenv("PWD"));
+		sprintf(tmp, "%s", getenv("OLDPWD"));
+		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", tmp, 1);
 	}
 	
@@ -160,7 +157,7 @@ int cd(int argc, char **argv){
 
 		//il faut stocker le chemin symbolique dans "$PWD" tel quel
 		if(argc == 1 || (argc == 2 && strcmp(argv[0],"-L")==0)){
-			sprintf(dernier_sym, "%s", getenv("PWD"));
+			setenv("OLDPWD", getenv("PWD"), 1);
 			setenv("PWD", tmp, 1);
 		}
 		//il faut stocker le chemin physique dans "$PWD"
