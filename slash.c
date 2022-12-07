@@ -141,6 +141,9 @@ int interpretation_command(int argc){
     if(strcmp((const char*) command, (const char*) "cd") == 0){
         return cd(argc, args);
     }
+    /* Commandes externs : avec appel de commandesExternes(line)
+    line : la chaine directement recuperer depuis l'appel à readline()
+    */
     
     //Commande introuvable
     char error_msg[100];
