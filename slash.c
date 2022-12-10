@@ -6,6 +6,7 @@
 #include "pwd/pwd.h"
 #include "constant.h"
 #include "cd/cd.h"
+#include "joker/joker.h"
 
 char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
