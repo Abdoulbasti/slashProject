@@ -105,6 +105,8 @@ int cd(int argc, char **argv){
 			sprintf(tmp, "%s", getenv("PWD"));
 		}
 		
+		printf("fd: %i\n", fd);
+
 		//nom du premier dossier dans le chemin à parcourir
 		char nom_dossier[PATH_MAX];
 
@@ -114,7 +116,15 @@ int cd(int argc, char **argv){
 
 			int fd_sous;
 			if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
+				printf("nom_dossier: %s\n", nom_dossier);
 				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
+				//appeler readlink sur fd
+				char chemin[PATH_MAX];
+				sprintf(chemin, "/proc/self/fd/%i", fd_sous);
+				char resultat[PATH_MAX];
+				readlink(chemin, resultat, 1000);
+				printf("%s\n", resultat);
+				printf("fd_sous: %i\n", fd_sous);
 			}
 			else if(argc == 2 && strcmp(argv[0], "-P") == 0){
 				strcat(tmp, "/");
