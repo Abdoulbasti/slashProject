@@ -6,6 +6,7 @@
 #include "pwd/pwd.h"
 #include "constant.h"
 #include "cd/cd.h"
+#include "joker/joker.h"
 
 char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -160,6 +161,17 @@ int main(int argc, char **argv){
         add_history(line);
 
         int nb_args = split_line(line);
+        int joker_return_value = joker(nb_args, args);
+        if(joker_return_value == -1){
+            continue;
+        }
+        printf("args:%d / joker:%d\n", nb_args, joker_return_value);
+        nb_args += joker_return_value;
+        for (size_t i = 0; i < nb_args; i++)
+        {
+            printf("arg%d: %s\n", i, args[i]);
+        }
+        
         last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
     }
 }
