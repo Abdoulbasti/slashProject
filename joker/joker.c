@@ -9,7 +9,7 @@ int is_etoile_simple(char* arg){
     return -1;    
 }
 
-int cherche_prefixe(char** argv2, char* arg, int place){
+int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     char path[PATH_MAX];
     strcpy(path, getenv("PWD"));
     char suffixe[MAX_ARGS_STRLEN];
@@ -19,20 +19,24 @@ int cherche_prefixe(char** argv2, char* arg, int place){
     strcat(path, arg);
     path[strlen(path) - 1] = '\0';
 
-    printf("%s : %s\n", path, suffixe);
-
     DIR * dir = opendir(path);
-    if(dir = NULL){
+    if(dir == NULL){
+        perror("");
         return -1;
     }
+
+    int nb_arg_ajout = 0;
     struct dirent * entry;
-    printf("TEST\n");
-	while((entry = readdir(dir))){
-        printf("TEST2\n");
-        //printf("%s\n", entry->d_name);
+	while((entry = readdir(dir)) != NULL){
+        if((strcmp(suffixe, (entry->d_name + strlen(entry->d_name) - strlen(suffixe))) == 0 
+        || strlen(suffixe) == 0) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name)){
+            argv[num_arg + nb_arg_ajout] = entry->d_name;
+            printf("%s\n", entry->d_name);
+            nb_arg_ajout++;
+        }
     }
 
-    return -1;
+    return nb_arg_ajout;
 }
 
 int joker(int argc, char** argv){
@@ -40,20 +44,16 @@ int joker(int argc, char** argv){
     for (size_t i = 0; i < argc; i++){
         argv2[i] = argv[i];
     }
-    
     int args_ajout = 0; //nbr d'arguments rajoutés
     int place = -1;
     for (size_t i = 0; i < argc; i++){
         place = is_etoile_simple(argv2[i]);
         if(place != -1){
-            args_ajout += cherche_prefixe(argv, argv2[i], place);
+            args_ajout += cherche_prefixe(argv, argv2[i], place, i + args_ajout);
         }else{
             argv[i + args_ajout] = (char*) argv2[i];
         }
     }
-    return -1;
-}
-
-int main(int argc, char** argv){
-    joker(argc, argv);
+    printf("%d\n", args_ajout);
+    return args_ajout - 1;
 }
