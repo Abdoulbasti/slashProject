@@ -1,19 +1,4 @@
-#include "commandesExternes.h"
-#include "../constant.h"
-#include <unistd.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <sys/wait.h>
-#include "../constant.h"
-
+#include "commandsExterns.h"
 
 char** allocation()
 {
@@ -119,3 +104,11 @@ void commandesExternes(char* chainePrompt)
     
     free((char**)commandes);
 }
+
+
+/*int main()
+{
+    char line[] = "cat";
+
+    commandesExternes(line);
+}*/

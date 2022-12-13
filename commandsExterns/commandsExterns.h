@@ -1,4 +1,4 @@
-/*#include <unistd.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
@@ -25,4 +25,4 @@ void executionCommandesExternesAutres(char** arguments);
 
 void executionCommandeExternes(char** arguments);
 
-void commandesExternes(char* chainePrompt)*/
+void commandesExternes(char* chainePrompt);
