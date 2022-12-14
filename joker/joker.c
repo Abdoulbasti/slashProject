@@ -48,10 +48,10 @@ int joker(int argc, char** argv){
     for (size_t i = 0; i < argc; i++){
         place = is_etoile_simple(argv2[i]);
         if(place != -1){
-            args_ajout += cherche_prefixe(argv, argv2[i], place, i + args_ajout);
-        }else{    printf("%d\n", args_ajout);
+            args_ajout += cherche_prefixe(argv, argv2[i], place, i + args_ajout) - 1;
+        }else{
             argv[i + args_ajout] = (char*) argv2[i];
         }
     }
-    return args_ajout - 1;
+    return args_ajout;
 }
