@@ -12,4 +12,6 @@ void enlever_premier_dossier(char * chemin);
 
 void enlever_dernier_dossier(char * chemin);
 
+void forme_canonique(char * chemin);
+
 int cd(int argc, char **argv);

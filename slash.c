@@ -74,6 +74,10 @@ char* print_error(char* error_msg){
     et renvoie le nombre d'arguments
 */
 int split_line(char* line){
+    if(line == NULL){
+        strcpy(command, (const char*) "");
+        fexit(last_return_value);
+    }
     char *tmp;
     int i = 0;  //nombre d'arguments
 
@@ -163,4 +167,14 @@ int main(int argc, char **argv){
         int nb_args = split_line(line);
         last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
     }
+
+    /*prochain_dossier(nom_dossier, chemin);
+    printf("nom_dossier: %s\n", nom_dossier);*/
+
+    /*char * chemin = malloc(PATH_MAX);
+    strcpy(chemin, "/home/matyas/projet-sy5-slash/x/y/z/d");
+    char * nom_dossier = malloc(PATH_MAX);
+    printf("chemin avant appel: %s\n", chemin);
+    forme_canonique(chemin);
+    printf("%s\n", chemin);*/
 }

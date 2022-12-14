@@ -9,7 +9,7 @@
 #include "cd.h"
 #include "../pwd/pwd.h"
 
-//insère dans "res" un string contenant les caractères jusqu'au premier "/" inclus de "chemin"
+//insère dans "nom_dossier" un string contenant les caractères jusqu'au premier "/" de "chemin" 
 void prochain_dossier(char * nom_dossier, char * chemin){
 	nom_dossier[0] = '\0';
 	int len = strlen(chemin);
@@ -44,122 +44,123 @@ void enlever_dernier_dossier(char * chemin){
 	chemin[i]='\0';
 }
 
-int cd(int argc, char **argv){
-	char * save_pwd = getenv("PWD");
-	if(argc == 0){
-		int fd = open(getenv("HOME"), O_RDONLY|O_DIRECTORY, 0666);
-		if(fd < 0){
-			perror(NULL);
-			return 1;
-		}
-		close(fd);
-		setenv("PWD", getenv("HOME"), 1);
+void enlever_premier_charactere(char * string){
+	if(strlen(string)>1){
+		char * tmp = malloc(PATH_MAX);
+		strcpy(tmp, string+1);
+		strcpy(string, tmp);
+		free(tmp);
+	}
+}
 
-	}
-	else if(argc == 1 && strcmp(argv[0],"-")==0){
-		//ouvre le dernier répertoire puis échange les deux chemins symboliques
-		int fd = open(getenv("OLDPWD"), O_RDONLY|O_DIRECTORY, 0666);
-		if(fd < 0){
-			perror(NULL);
-			return 1;
+//prend en paramètre un réference absolue (commençant par '/'), et renvoie sa forme canonique (sans "." et "..")
+void forme_canonique(char * chemin){
+	char * res = malloc(PATH_MAX);
+	char * nom_dossier = malloc(PATH_MAX);
+	strcpy(res, "");
+	strcpy(nom_dossier, "");
+	enlever_premier_charactere(chemin);
+	while(chemin[0] != '\0'){
+		prochain_dossier(nom_dossier, chemin);
+		//disjonction des cas en fontion du premier dossier
+		//".": ne rien faire
+		//"..": enlever les dernier dossier de "res", sauf si "res" est la chaîne "/". Dans ce cas, ne rien faire
+		//autre: l'ajouter à "res"
+		if(strcmp(nom_dossier, ".") == 0){
 		}
-		close(fd);
-		char tmp[PATH_MAX];
-		sprintf(tmp, "%s", getenv("OLDPWD"));
-		setenv("PWD", tmp, 1);
-	}
-	
-	else if(argc == 1 || 
-		(argc == 2 && 
-			(strcmp(argv[0], "-L") == 0 || strcmp(argv[0], "-P") == 0) )){
-		char param[PATH_MAX];
-		if(argc == 1){
-			sprintf(param, "%s", argv[0]);
+		else if(strcmp(nom_dossier, "..") == 0){
+			enlever_dernier_dossier(res);
 		}
 		else{
+			strcat(res, "/");
+			strcat(res, nom_dossier);
+		}
+		enlever_premier_dossier(chemin);
+
+	}
+	free(nom_dossier);
+	strcpy(chemin, res);
+	free(res);
+}
+
+int cd(int argc, char **argv){
+	// 1. Calculer un path en fonction des arguemnets
+	// 1. a. si -L, rendre cannonique
+	// 1. b. sinon, -P, realpath()
+	// 2. chdir(path), setenv, ...
+
+	//booléens indiquant l'interprétation souhaitée selon les paramètres
+	int interpretation_physique = (argc == 2 && strcmp(argv[0], "-P") == 0);
+	int interpretation_logique = (argc == 1 || (argc == 2 && (strcmp(argv[0], "-L") == 0)));
+
+	char * chemin = malloc(PATH_MAX);
+	//variable sotckant le chemin passé en paramètre
+	char * param = malloc(PATH_MAX);
+	//"cd" tout court
+	if(argc == 0){
+		sprintf(chemin, "%s", getenv("HOME"));
+	}
+	//"cd -"
+	else if(argc == 1 && strcmp(argv[0],"-")==0){		
+		sprintf(chemin, "%s", getenv("OLDPWD"));
+	}
+	//"cd [-L|-P] chemin"
+	else{
+		//si il y a deux arguments, le chemin se trouve dans le deuxième
+		if(argc == 2){
 			sprintf(param, "%s", argv[1]);
 		}
-		//stocke le nouveau chemin symbolique. Il sera écrit dans la variable "pwd" si il est valide
-		char tmp[PATH_MAX];
-		tmp[0] = '\0';
-
-		//ouverture du dossier à partir duquel le parcours sera effectué
-		int fd;
-		//si c'est une référence relative, le parcours commence par le répertoire de travail
-		if(param[0] == '/'){
-			fd = open("/", O_RDONLY|O_DIRECTORY, 0666);
-			if(fd < 0){
-				perror(NULL);
-				return 1;
-			}
-			//on enlève le premier "/" de param
-			enlever_premier_dossier(param);
+		//si il y un argument, c'est le chemin
+		else if(argc == 1){
+			sprintf(param, "%s", argv[0]);
+		}
+		//si le chemin passé en paramètre est une référence relative, ajouter "pwd" devant
+		if(param[0] != '/'){
+			sprintf(chemin, "%s/%s", getenv("PWD"), param);
 		}
 		else{
-			fd = open(getenv("PWD"), O_RDONLY|O_DIRECTORY, 0666);
-			if(fd < 0){
+			sprintf(chemin, "%s", param);
+		}
+
+		//interprétation physique
+		if(interpretation_physique){
+			realpath(param, chemin);
+			if(chemin == NULL){
 				perror(NULL);
 				return 1;
 			}
-			//comme le parcours commence par le répertoire de travail courant, c'est la valeur de $PWD qui est copiée dans tmp
-			sprintf(tmp, "%s", getenv("PWD"));
 		}
-		
-		//nom du premier dossier dans le chemin à parcourir
-		char nom_dossier[PATH_MAX];
-
-		//boucle de parcours
-		while(param[0]!='\0'){
-			prochain_dossier(nom_dossier, param);
-
-			int fd_sous;
-			if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
-				fd_sous = openat(fd, nom_dossier, O_RDONLY|O_DIRECTORY,  0666);
-			}
-			else if(argc == 2 && strcmp(argv[0], "-P") == 0){
-				strcat(tmp, "/");
-				strcat(tmp, nom_dossier);
-				if(construit_chemin(tmp, 1) != 0 ){
-					perror("cd");
-					setenv("PWD", save_pwd, 1);
-					return 1;
-				}
-			}
-			if(fd_sous < 0){
-				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
-					strcpy(argv[0], "-P"); 
-					//char * nargv[] = {"-P", param};
-					return cd(2, argv);
-				}
-				else{
-					perror(NULL);
-					return 1;
-				}
-			}
-			else{
-				close(fd);
-				fd = fd_sous;
-			}
-
-			if(strcmp(nom_dossier, "..") == 0){
-				if(argc == 1 || (argc == 2 && strcmp(argv[0], "-L") == 0)){
-					enlever_dernier_dossier(tmp);
-				}
-			}
-			else if(strcmp(nom_dossier, ".") != 0){
-				strcat(tmp, "/");
-				strcat(tmp, nom_dossier);
-			}
-			enlever_premier_dossier(param);
+		//interprétation logique
+		else if(interpretation_logique){
+			forme_canonique(chemin);
 		}
-		close(fd);
-		setenv("PWD", tmp, 1);
+		else{
+			exit(1);
+		}
 	}
 
+	if(chdir(chemin) != 0){
+		if(interpretation_logique){
+			char * arg2[2];
+			arg2[0] = malloc(PATH_MAX);
+			arg2[1] = malloc(PATH_MAX);
+			strcpy(arg2[0], "-P");
+			strcpy(arg2[1], param);
+			int retour = cd(2, arg2);
+			free(arg2[0]);
+			free(arg2[1]);
+			return retour;
+		}
+		else{
+			perror(NULL);
+			return 1;
+		}
+	}
 	else{
-		//afficher les instruction d'utilisation
-		return 1;
+		setenv("OLDPWD", getenv("PWD"), 1);
+		setenv("PWD", chemin, 1);
 	}
-	setenv("OLDPWD", save_pwd, 1);
+	free(chemin);
+	free(param);
 	return 0;
 }
