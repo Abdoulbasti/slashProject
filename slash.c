@@ -74,6 +74,10 @@ char* print_error(char* error_msg){
     et renvoie le nombre d'arguments
 */
 int split_line(char* line){
+    if(line == NULL){
+        strcpy(command, (const char*) "");
+        fexit(last_return_value);
+    }
     char *tmp;
     int i = 0;  //nombre d'arguments
 
