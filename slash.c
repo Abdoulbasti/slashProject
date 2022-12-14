@@ -173,14 +173,4 @@ int main(int argc, char **argv){
         
         last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
     }
-
-    /*prochain_dossier(nom_dossier, chemin);
-    printf("nom_dossier: %s\n", nom_dossier);*/
-
-    /*char * chemin = malloc(PATH_MAX);
-    strcpy(chemin, "/home/matyas/projet-sy5-slash/x/y/z/d");
-    char * nom_dossier = malloc(PATH_MAX);
-    printf("chemin avant appel: %s\n", chemin);
-    forme_canonique(chemin);
-    printf("%s\n", chemin);*/
 }

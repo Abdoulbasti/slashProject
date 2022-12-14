@@ -127,6 +127,8 @@ int cd(int argc, char **argv){
 			realpath(param, chemin);
 			if(chemin == NULL){
 				perror(NULL);
+				free(chemin);
+				free(param);
 				return 1;
 			}
 		}
@@ -135,6 +137,8 @@ int cd(int argc, char **argv){
 			forme_canonique(chemin);
 		}
 		else{
+			free(chemin);
+			free(param);
 			exit(1);
 		}
 	}
@@ -149,9 +153,13 @@ int cd(int argc, char **argv){
 			int retour = cd(2, arg2);
 			free(arg2[0]);
 			free(arg2[1]);
+			free(chemin);
+			free(param);
 			return retour;
 		}
 		else{
+			free(chemin);
+			free(param);
 			perror(NULL);
 			return 1;
 		}
@@ -162,5 +170,6 @@ int cd(int argc, char **argv){
 	}
 	free(chemin);
 	free(param);
+
 	return 0;
 }
