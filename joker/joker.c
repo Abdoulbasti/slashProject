@@ -61,12 +61,13 @@ int joker(int argc, char** argv){
     for (size_t i = 0; i < argc; i++){
         argv3[i] = argv[i];
     }
-
+    int nbEtoiles = 0;
     int args_ajout = 0; //nbr d'arguments rajoutés
     int place = -1;
     for (size_t i = 0; i < argc; i++){
         place = is_etoile_simple(argv2[i]);
         if(place != -1){
+            nbEtoiles++;
             args_ajout += cherche_prefixe(argv, argv2[i], place, i + args_ajout);
         }else{
             char* tmp = (char*) malloc(sizeof(char)* MAX_ARGS_STRLEN);
@@ -74,8 +75,11 @@ int joker(int argc, char** argv){
             argv[i + args_ajout] = (char*) argv2[i];
         }
     }
+    if(!nbEtoiles){
+        return -1;
+    }
 
-    if(args_ajout <= 0){
+    if(args_ajout <= 0 && argc != 0){
        for (size_t i = 0; i < argc; i++){
             char* tmp = (char*) malloc(sizeof(char)* MAX_ARGS_STRLEN);
             strcpy(tmp, argv2[i]);

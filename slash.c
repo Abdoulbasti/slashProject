@@ -33,7 +33,9 @@ void recupererCommandeEtArguments(char line[])
     //while ((tokenSuivant = strtok_r(chainesArguments, espace, &chainesArguments)))
     while ((tokenSuivant = strtok_r(str, espace, &str)))
     {
-        commandesEtArgument[compteur] = tokenSuivant;
+        char * tmp = (char *) malloc(sizeof(char) * MAX_ARGS_NUMBER);
+        strcpy(tmp, tokenSuivant);
+        commandesEtArgument[compteur] = tmp;
         compteur++;
     }
     commandesEtArgument[compteur] = NULL;
@@ -142,7 +144,7 @@ int interpretation_command(int argc, char commandesAndArguments):
     regarde quel commande correspond a quel fonction et l'execute
     puis renvoie la valeur de retour de la fonction*/
 
-int interpretation_command(int argc, char* commandesAndArguments){
+int interpretation_command(int argc){
     //aucune commande
     
     if (strcmp((const char*) command, (const char*) "") == 0){
@@ -177,7 +179,13 @@ int interpretation_command(int argc, char* commandesAndArguments){
     //commandes externs
     else
     {
-        return commandesExternes(commandesAndArguments);
+        char * argvTmp[MAX_ARGS_STRLEN];
+        argvTmp[0] = command;
+        for (size_t i = 0; i < argc; i++){
+            argvTmp[1+i] = args[0];
+        }
+        
+        return commandesExternes(argvTmp);
     }
     
     //Commande introuvable
@@ -190,7 +198,9 @@ int interpretation_command(int argc, char* commandesAndArguments){
 
 void freeAll(int argc){
     for (size_t i = 0; i < argc; i++){
-        free(args[i]);
+        if(args[i] != NULL){
+            free(args[i]);
+        }
     }
 }
 
@@ -222,15 +232,14 @@ int main(int argc, char **argv){
         add_history(line);    
         int nb_args = split_line(line);
         int joker_return_value = joker(nb_args, args);
-        if(joker_return_value == -1){
-            continue;
-        }
-        nb_args += joker_return_value;
-        
-        last_return_value = interpretation_command(nb_args, commandesEtArgument) % 256;  //return_value entre -256 et 256
 
-        //libération de la mémoire du string renvoyé par readline
-        free(line);
+        if(joker_return_value != -1){
+            nb_args += joker_return_value;
+        }
+
+        last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
+
+        //libération des arguments
         freeAll(nb_args);
     }
 
