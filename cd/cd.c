@@ -93,7 +93,7 @@ int cd(int argc, char **argv){
 	int interpretation_physique = (argc == 2 && strcmp(argv[0], "-P") == 0);
 	int interpretation_logique = (argc == 1 || (argc == 2 && (strcmp(argv[0], "-L") == 0)));
 
-	char chemin[PATH_MAX];
+	char * chemin = malloc(PATH_MAX);
 	//variable stockant le chemin passé en paramètre
 	char param[PATH_MAX];
 	//"cd" tout court
@@ -124,8 +124,10 @@ int cd(int argc, char **argv){
 
 		//interprétation physique
 		if(interpretation_physique){
-			realpath(param, chemin);
+			free(chemin);
+			chemin = construit_chemin(param, 0);
 			if(chemin == NULL){
+				free(chemin);
 				perror(NULL);
 				return 1;
 			}
@@ -135,6 +137,7 @@ int cd(int argc, char **argv){
 			forme_canonique(chemin);
 		}
 		else{
+			free(chemin);
 			exit(1);
 		}
 	}
@@ -146,6 +149,7 @@ int cd(int argc, char **argv){
 			arg2[1] = malloc(PATH_MAX);
 			strcpy(arg2[0], "-P");
 			strcpy(arg2[1], param);
+			free(chemin);
 			int retour = cd(2, arg2);
 			free(arg2[0]);
 			free(arg2[1]);
@@ -153,6 +157,7 @@ int cd(int argc, char **argv){
 			return retour;
 		}
 		else{
+			free(chemin);
 			perror(NULL);
 			return 1;
 		}
@@ -161,6 +166,7 @@ int cd(int argc, char **argv){
 		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", chemin, 1);
 	}
+	free(chemin);
 
 	return 0;
 }
