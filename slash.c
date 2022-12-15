@@ -98,17 +98,20 @@ int split_line(char* line){
         strcpy(command, (const char*) "");
         return 0;
     }
-    strcpy(tmp, strtok(line, " "));
-    //tmp = strtok(line, " ");    //découpe la partie avant le première espace
-    strcpy(command, (const char*) tmp);     //la première partie est la commande
-    while(tmp != NULL){
-        tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+    //strcpy(tmp, strtok(NULL, " "));
+    char * tmp2 = strtok(line, " ");   //découpe la partie avant le première espace
+    strcpy(command, (const char*) tmp2);     //la première partie est la commande
+    while(tmp2 != NULL){
         if(i != 0){
             //on ajoute un argument
             args[i-1] = tmp;
         }
-        strcpy(tmp, strtok(line, " "));
-        //tmp = strtok(NULL, " ");    //découpe la partie avant le première espace
+        tmp2 = strtok(NULL, " ");       //découpe la partie avant le première espace
+        if(tmp2 != NULL){
+            tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+            strcpy(tmp, tmp2);
+        }
+        //tmp = strtok(NULL, " ");    
         i++;
     }
     return i-1;
@@ -188,25 +191,15 @@ int main(int argc, char **argv){
 
     while(1){
         //affiche le prompt et attend l'utilisateur
-        line = readline(prompt_format());
-        
-        //Traitement pour commandes externes
-        char lineArray[MAX_ARGS_NUMBER];
-        strcpy(lineArray, line);
-       
-
-
-        /*ici...
-        char lineArray[MAX_ARGS_NUMBER];
-        strcpy(lineArray, line);
-        recupererCommandeEtArguments(lineArray);
-        printf("%s\n", commandesEtArgument[1]);*/
+        line = readline(prompt_format());        
         
 
 
         //permet de retrouver une commande exécutée avec les flèches du haut et du bas
         add_history(line);    
         int nb_args = split_line(line);
+        
+
         int joker_return_value = joker(nb_args, args);
 
         if(joker_return_value != -1){
