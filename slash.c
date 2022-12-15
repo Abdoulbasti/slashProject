@@ -155,6 +155,10 @@ int interpretation_command(int argc){
     //Comande cd
     if(strcmp((const char*) command, (const char*) "cd") == 0){
         return cd(argc, args);
+    }else if(strcmp((const char*) command, (const char*) "true") == 0){
+        return 0;
+    }else if(strcmp((const char*) command, (const char*) "false") == 0){
+        return 1;
     }
     //commandes externs
     else
