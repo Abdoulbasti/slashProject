@@ -13,16 +13,12 @@
 #include "../constant.h"
 
 
-
-
-char** allocation();
+void recupererCommandeEtArguments(char line[]);
 
 void gestionErreur(char* nomFonction);
 
-char** recupererCommandeEtArguments(char chainePrompt[MAX_ARGS_STRLEN]);
+int executionCommandesExternesAutres(char* arguments[MAX_ARGS_NUMBER]);
 
-void executionCommandesExternesAutres(char** arguments);
+int executionCommandeExternes(char* arguments[MAX_ARGS_NUMBER]);
 
-void executionCommandeExternes(char** arguments);
-
-void commandesExternes(char* chainePrompt);
+int commandesExternes(char* commandes[MAX_ARGS_NUMBER]);
