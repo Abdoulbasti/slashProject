@@ -98,15 +98,17 @@ int split_line(char* line){
         strcpy(command, (const char*) "");
         return 0;
     }
-
-    tmp = strtok(line, " ");    //découpe la partie avant le première espace
+    strcpy(tmp, strtok(line, " "));
+    //tmp = strtok(line, " ");    //découpe la partie avant le première espace
     strcpy(command, (const char*) tmp);     //la première partie est la commande
     while(tmp != NULL){
+        tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
         if(i != 0){
             //on ajoute un argument
             args[i-1] = tmp;
         }
-        tmp = strtok(NULL, " ");    //découpe la partie avant le première espace
+        strcpy(tmp, strtok(line, " "));
+        //tmp = strtok(NULL, " ");    //découpe la partie avant le première espace
         i++;
     }
     return i-1;
