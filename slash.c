@@ -10,36 +10,11 @@
 #include <stdlib.h>
 #include "commandsExterns/commandesExterns.h"
 
-char* commandesEtArgument[MAX_ARGS_NUMBER]; //Pour stocker la commande externe et ses arguments
-
 char prompt_msg[100];       //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
 char* args[MAX_ARGS_NUMBER];    //arguments de la commande entrée dans le prompt
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
 char chemin_sym[PATH_MAX] = "/";    //Chemin relatif
-
-
-/*
-Organiser le line en commande et arguments stocker dans la variable globale commandesEtArgument 
-*/
-void recupererCommandeEtArguments(char line[])
-{
-    //char** arguments = allocation();
-    char* espace = " ";
-    int compteur = 0;
-    char* tokenSuivant;
-    
-    char* str = line;
-    //while ((tokenSuivant = strtok_r(chainesArguments, espace, &chainesArguments)))
-    while ((tokenSuivant = strtok_r(str, espace, &str)))
-    {
-        char * tmp = (char *) malloc(sizeof(char) * MAX_ARGS_NUMBER);
-        strcpy(tmp, tokenSuivant);
-        commandesEtArgument[compteur] = tmp;
-        compteur++;
-    }
-    commandesEtArgument[compteur] = NULL;
-}
 
 
 
@@ -216,7 +191,6 @@ int main(int argc, char **argv){
         //Traitement pour commandes externes
         char lineArray[MAX_ARGS_NUMBER];
         strcpy(lineArray, line);
-        recupererCommandeEtArguments(lineArray);
        
 
 
