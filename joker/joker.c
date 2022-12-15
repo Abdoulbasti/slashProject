@@ -32,6 +32,19 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
         || strlen(suffixe) == 0) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name)){
             argv[num_arg + nb_arg_ajout] = entry->d_name;
             nb_arg_ajout++;
+            printf("Test 1 %s\n", entry->d_name);
+            printf("Test 1 %s\n", argv[num_arg + nb_arg_ajout]);
+            int place = is_etoile_simple(argv[num_arg + nb_arg_ajout]);
+            if(place != -1){
+                printf("Test 2\n");
+                char copyArg[MAX_ARGS_STRLEN];
+                strcpy(copyArg, argv[num_arg + nb_arg_ajout]);
+                printf("Test 3: %s\n", copyArg);
+                nb_arg_ajout += cherche_prefixe(argv, copyArg, place, num_arg + nb_arg_ajout) - 1;
+            }else{
+                nb_arg_ajout--;
+            }
+            nb_arg_ajout++;
         }
     }
  
@@ -53,5 +66,9 @@ int joker(int argc, char** argv){
             argv[i + args_ajout] = (char*) argv2[i];
         }
     }
+    for (size_t i = 0; i < args_ajout; i++){
+        printf("%s\n", argv[i]);
+    }
+    
     return args_ajout;
 }
