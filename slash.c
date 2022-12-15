@@ -113,7 +113,7 @@ int split_line(char* line){
         strcpy(command, (const char*) "");
         fexit(last_return_value);
     }
-    char *tmp;
+    char *tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
     int i = 0;  //nombre d'arguments
 
     //Rien n'est rentré dans le prompt
@@ -188,6 +188,12 @@ int interpretation_command(int argc, char* commandesAndArguments){
     return last_return_value;
 }
 
+void freeAll(int argc){
+    for (size_t i = 0; i < argc; i++){
+        free(args[i]);
+    }
+}
+
 int main(int argc, char **argv){
     char* line = (char*)NULL;
     rl_outstream = stderr;  //changement de la sortie vers la sortie d'erreur
@@ -225,6 +231,7 @@ int main(int argc, char **argv){
 
         //libération de la mémoire du string renvoyé par readline
         free(line);
+        freeAll(nb_args);
     }
 
 
