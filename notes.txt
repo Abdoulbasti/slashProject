@@ -1,0 +1,11 @@
+Comment fonctionne l'execution d'une commande externe : 
+
+        1.Cas des commandes(executable) se trouvant dans les rep de la variables $PATH
+            ->Effectuer un exec sur tous les commandes se trouvant dans /usr/bin et executer cet exec 
+            dans un processus fils apres avoir effectuer un fork.
+            -> Avec usage du wait.
+
+        2.Cas des commande(sexécutables) se trouvant à un emplacement precis
+            ->Effectuer un exec sur tous les commandes se trouvant dans à un emplacement fourni par l'utilisateur
+                et executer cet exec dans un processus fils apres avoir effectuer un fork.
+            -> Avec usage du wait.

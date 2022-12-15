@@ -8,12 +8,37 @@
 #include "cd/cd.h"
 #include "joker/joker.h"
 #include <stdlib.h>
+#include "commandsExterns/commandesExterns.h"
 
-char prompt_msg[100];        //Message du prompt
+char* commandesEtArgument[MAX_ARGS_NUMBER]; //Pour stocker la commande externe et ses arguments
+
+char prompt_msg[100];       //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
 char* args[MAX_ARGS_NUMBER];    //arguments de la commande entrée dans le prompt
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
 char chemin_sym[PATH_MAX] = "/";    //Chemin relatif
+
+
+/*
+Organiser le line en commande et arguments stocker dans la variable globale commandesEtArgument 
+*/
+void recupererCommandeEtArguments(char line[])
+{
+    //char** arguments = allocation();
+    char* espace = " ";
+    int compteur = 0;
+    char* tokenSuivant;
+    
+    char* str = line;
+    //while ((tokenSuivant = strtok_r(chainesArguments, espace, &chainesArguments)))
+    while ((tokenSuivant = strtok_r(str, espace, &str)))
+    {
+        commandesEtArgument[compteur] = tokenSuivant;
+        compteur++;
+    }
+    commandesEtArgument[compteur] = NULL;
+}
+
 
 
 /*
@@ -112,12 +137,14 @@ int split_line(char* line){
 
 
 /*
-    int interpretation_command(int argc):
+
+int interpretation_command(int argc, char commandesAndArguments):
     regarde quel commande correspond a quel fonction et l'execute
-    puis renvoie la valeur de retour de la fonction
-*/
-int interpretation_command(int argc){
+    puis renvoie la valeur de retour de la fonction*/
+
+int interpretation_command(int argc, char* commandesAndArguments){
     //aucune commande
+    
     if (strcmp((const char*) command, (const char*) "") == 0){
         return last_return_value;
     }
@@ -147,6 +174,11 @@ int interpretation_command(int argc){
     if(strcmp((const char*) command, (const char*) "cd") == 0){
         return cd(argc, args);
     }
+    //commandes externs
+    else
+    {
+        return commandesExternes(commandesAndArguments);
+    }
     
     //Commande introuvable
     char error_msg[100];
@@ -159,12 +191,29 @@ int interpretation_command(int argc){
 int main(int argc, char **argv){
     char* line = (char*)NULL;
     rl_outstream = stderr;  //changement de la sortie vers la sortie d'erreur
+    
+
     while(1){
         //affiche le prompt et attend l'utilisateur
         line = readline(prompt_format());
-        //permet de retrouver une commande exécutée avec les flèches du haut et du bas
-        add_history(line);
+        
+        //Traitement pour commandes externes
+        char lineArray[MAX_ARGS_NUMBER];
+        strcpy(lineArray, line);
+        recupererCommandeEtArguments(lineArray);
+       
 
+
+        /*ici...
+        char lineArray[MAX_ARGS_NUMBER];
+        strcpy(lineArray, line);
+        recupererCommandeEtArguments(lineArray);
+        printf("%s\n", commandesEtArgument[1]);*/
+        
+
+
+        //permet de retrouver une commande exécutée avec les flèches du haut et du bas
+        add_history(line);    
         int nb_args = split_line(line);
         int joker_return_value = joker(nb_args, args);
         if(joker_return_value == -1){
@@ -172,9 +221,33 @@ int main(int argc, char **argv){
         }
         nb_args += joker_return_value;
         
-        last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
+        last_return_value = interpretation_command(nb_args, commandesEtArgument) % 256;  //return_value entre -256 et 256
 
         //libération de la mémoire du string renvoyé par readline
         free(line);
     }
+
+
+        /*char* lineCommandesExternes = line;
+        char lineArray[MAX_ARGS_NUMBER];
+        strcpy(lineArray, lineCommandesExternes);
+        recupererCommandeEtArguments(lineArray);
+        printf("%s\n", commandesEtArgument[1]);*/
+
+
+
+    //Test commandes externs dans le main
+    //args[0] = "cat";
+    //args[1] = "-al";
+    //args[1] = NULL;
+    //args[2] = NULL;
+    //line = "ls -al";
+    //commandesExternes(args);
+
+    /*char* l =  "ls -la jghg";
+    char s[MAX_ARGS_NUMBER];
+    strcpy(s, l);
+    recupererCommandeEtArguments(s);
+    printf("%s\n", commandesEtArgument[2]);*/ 
+
 }
