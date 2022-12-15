@@ -6,6 +6,8 @@
 #include "pwd/pwd.h"
 #include "constant.h"
 #include "cd/cd.h"
+#include "joker/joker.h"
+#include <stdlib.h>
 
 char prompt_msg[100];        //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -68,11 +70,24 @@ char* print_error(char* error_msg){
 
 
 /*
+    void fexit(int val):
+    termine le programme avec la valeur val
+*/
+void fexit(int val){
+    exit(val);
+}
+
+
+/*
     int split_line(char* line):
     recupère la commande et ses arguments pour les mettres dans les variable command et args
     et renvoie le nombre d'arguments
 */
 int split_line(char* line){
+    if(line == NULL){
+        strcpy(command, (const char*) "");
+        fexit(last_return_value);
+    }
     char *tmp;
     int i = 0;  //nombre d'arguments
 
@@ -93,15 +108,6 @@ int split_line(char* line){
         i++;
     }
     return i-1;
-}
-
-
-/*
-    void fexit(int val):
-    termine le programme avec la valeur val
-*/
-void fexit(int val){
-    exit(val);
 }
 
 
@@ -160,6 +166,15 @@ int main(int argc, char **argv){
         add_history(line);
 
         int nb_args = split_line(line);
+        int joker_return_value = joker(nb_args, args);
+        if(joker_return_value == -1){
+            continue;
+        }
+        nb_args += joker_return_value;
+        
         last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
+
+        //libération de la mémoire du string renvoyé par readline
+        free(line);
     }
 }
