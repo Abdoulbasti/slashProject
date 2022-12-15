@@ -90,7 +90,8 @@ int split_line(char* line){
         strcpy(command, (const char*) "");
         fexit(last_return_value);
     }
-    char *tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+    //char *tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+    char * tmp;
     int i = 0;  //nombre d'arguments
 
     //Rien n'est rentré dans le prompt
