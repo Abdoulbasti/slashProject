@@ -93,9 +93,9 @@ int cd(int argc, char **argv){
 	int interpretation_physique = (argc == 2 && strcmp(argv[0], "-P") == 0);
 	int interpretation_logique = (argc == 1 || (argc == 2 && (strcmp(argv[0], "-L") == 0)));
 
-	char * chemin = malloc(PATH_MAX);
-	//variable sotckant le chemin passé en paramètre
-	char * param = malloc(PATH_MAX);
+	char chemin[PATH_MAX];
+	//variable stockant le chemin passé en paramètre
+	char param[PATH_MAX];
 	//"cd" tout court
 	if(argc == 0){
 		sprintf(chemin, "%s", getenv("HOME"));
@@ -141,7 +141,7 @@ int cd(int argc, char **argv){
 
 	if(chdir(chemin) != 0){
 		if(interpretation_logique){
-			char * arg2[2];
+			char ** arg2 = malloc(2*sizeof(char*));
 			arg2[0] = malloc(PATH_MAX);
 			arg2[1] = malloc(PATH_MAX);
 			strcpy(arg2[0], "-P");
@@ -149,6 +149,7 @@ int cd(int argc, char **argv){
 			int retour = cd(2, arg2);
 			free(arg2[0]);
 			free(arg2[1]);
+			free(arg2);
 			return retour;
 		}
 		else{
@@ -160,7 +161,6 @@ int cd(int argc, char **argv){
 		setenv("OLDPWD", getenv("PWD"), 1);
 		setenv("PWD", chemin, 1);
 	}
-	free(chemin);
-	free(param);
+
 	return 0;
 }

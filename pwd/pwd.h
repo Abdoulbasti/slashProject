@@ -26,4 +26,4 @@ int est_racine();
     setEnv(0:false, 1:true) : défini si le chemin construit doit 
     remplacer le lien de la variable d'environement PWD
 */
-int construit_chemin(char* lien_symbolique, int setEnv);
+char* construit_chemin(char* lien_symbolique, int setEnv);
