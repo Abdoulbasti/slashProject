@@ -24,13 +24,15 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
         perror("");
         return 0;
     }
- 
+
+
+    char * arg2;
     int nb_arg_ajout = 0;
     struct dirent * entry;
 	while((entry = readdir(dir)) != NULL){
         if((strcmp(suffixe, (entry->d_name + strlen(entry->d_name) - strlen(suffixe))) == 0 
         || strlen(suffixe) == 0 || entry->d_type == DT_DIR) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name)){
-            char *arg2 = malloc(sizeof(char) * MAX_ARGS_STRLEN );
+            //char *arg2 = malloc(sizeof(char) * MAX_ARGS_STRLEN );
             strcpy(arg2, arg);
             strcat(arg2, entry->d_name);
             int place = -1;
@@ -45,9 +47,11 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
                 char copyArg[MAX_ARGS_STRLEN];
                 strcpy(copyArg, arg2);
                 nb_arg_ajout += cherche_prefixe(argv, copyArg, place, num_arg + nb_arg_ajout);
-            }            
+            }
+
         }
     }
+    free(arg2);
  
     return nb_arg_ajout;
 }
@@ -70,8 +74,6 @@ int joker(int argc, char** argv){
             nbEtoiles++;
             args_ajout += cherche_prefixe(argv, argv2[i], place, i + args_ajout);
         }else{
-            char* tmp = (char*) malloc(sizeof(char)* MAX_ARGS_STRLEN);
-            strcpy(tmp, argv2[i]);
             argv[i + args_ajout] = (char*) argv2[i];
         }
     }
@@ -84,6 +86,7 @@ int joker(int argc, char** argv){
             char* tmp = (char*) malloc(sizeof(char)* MAX_ARGS_STRLEN);
             strcpy(tmp, argv2[i]);
             argv[i] = tmp;
+            free(tmp);
             return argc;
        } 
     }

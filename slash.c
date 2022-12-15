@@ -108,6 +108,7 @@ int split_line(char* line){
         }
         tmp2 = strtok(NULL, " ");       //découpe la partie avant le première espace
         if(tmp2 != NULL){
+            //free(tmp);
             tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
             strcpy(tmp, tmp2);
         }
@@ -210,6 +211,7 @@ int main(int argc, char **argv){
 
         //libération des arguments
         freeAll(nb_args);
+        free(line);
     }
 
 
