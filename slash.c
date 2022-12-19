@@ -165,10 +165,10 @@ int interpretation_command(int argc){
     //commandes externs
     else
     {
-        char * argvTmp[MAX_ARGS_STRLEN];
+        char* argvTmp[MAX_ARGS_STRLEN];
         argvTmp[0] = command;
         for (size_t i = 0; i < argc; i++){
-            argvTmp[1+i] = args[0];
+            argvTmp[i+1] = args[i];
         }
         
         return commandesExternes(argvTmp);

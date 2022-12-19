@@ -1,7 +1,6 @@
 #include "commandesExterns.h"
 
 
-
 void gestionErreur(char* nomFonction)
 {
     perror(nomFonction);
@@ -56,6 +55,7 @@ tout les autres commandes se trouvant à un emplacement fournis par
 l'utilisateur.
 */
 int commandesExternes(char* commandes[MAX_ARGS_NUMBER])
+
 {
     char* nomFonction = "fork";
     
