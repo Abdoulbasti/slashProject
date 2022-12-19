@@ -8,12 +8,14 @@
 #include "cd/cd.h"
 #include "joker/joker.h"
 #include <stdlib.h>
+#include "commandsExterns/commandesExterns.h"
 
-char prompt_msg[100];        //Message du prompt
+char prompt_msg[100];       //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
 char* args[MAX_ARGS_NUMBER];    //arguments de la commande entrée dans le prompt
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
 char chemin_sym[PATH_MAX] = "/";    //Chemin relatif
+
 
 
 /*
@@ -88,7 +90,8 @@ int split_line(char* line){
         strcpy(command, (const char*) "");
         fexit(last_return_value);
     }
-    char *tmp;
+    //char *tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+    char * tmp;
     int i = 0;  //nombre d'arguments
 
     //Rien n'est rentré dans le prompt
@@ -96,15 +99,21 @@ int split_line(char* line){
         strcpy(command, (const char*) "");
         return 0;
     }
-
-    tmp = strtok(line, " ");    //découpe la partie avant le première espace
-    strcpy(command, (const char*) tmp);     //la première partie est la commande
-    while(tmp != NULL){
+    //strcpy(tmp, strtok(NULL, " "));
+    char * tmp2 = strtok(line, " ");   //découpe la partie avant le première espace
+    strcpy(command, (const char*) tmp2);     //la première partie est la commande
+    while(tmp2 != NULL){
         if(i != 0){
             //on ajoute un argument
             args[i-1] = tmp;
         }
-        tmp = strtok(NULL, " ");    //découpe la partie avant le première espace
+        tmp2 = strtok(NULL, " ");       //découpe la partie avant le première espace
+        if(tmp2 != NULL){
+            //free(tmp);
+            tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+            strcpy(tmp, tmp2);
+        }
+        //tmp = strtok(NULL, " ");    
         i++;
     }
     return i-1;
@@ -112,12 +121,14 @@ int split_line(char* line){
 
 
 /*
-    int interpretation_command(int argc):
+
+int interpretation_command(int argc, char commandesAndArguments):
     regarde quel commande correspond a quel fonction et l'execute
-    puis renvoie la valeur de retour de la fonction
-*/
+    puis renvoie la valeur de retour de la fonction*/
+
 int interpretation_command(int argc){
     //aucune commande
+    
     if (strcmp((const char*) command, (const char*) "") == 0){
         return last_return_value;
     }
@@ -146,6 +157,21 @@ int interpretation_command(int argc){
     //Comande cd
     if(strcmp((const char*) command, (const char*) "cd") == 0){
         return cd(argc, args);
+    }else if(strcmp((const char*) command, (const char*) "true") == 0){
+        return 0;
+    }else if(strcmp((const char*) command, (const char*) "false") == 0){
+        return 1;
+    }
+    //commandes externs
+    else
+    {
+        char * argvTmp[MAX_ARGS_STRLEN];
+        argvTmp[0] = command;
+        for (size_t i = 0; i < argc; i++){
+            argvTmp[1+i] = args[0];
+        }
+        
+        return commandesExternes(argvTmp);
     }
     
     //Commande introuvable
@@ -156,25 +182,64 @@ int interpretation_command(int argc){
     return last_return_value;
 }
 
+void freeAll(int argc){
+    for (size_t i = 0; i < argc; i++){
+        if(args[i] != NULL){
+            free(args[i]);
+        }
+    }
+}
+
 int main(int argc, char **argv){
     char* line = (char*)NULL;
     rl_outstream = stderr;  //changement de la sortie vers la sortie d'erreur
+    
+
     while(1){
         //affiche le prompt et attend l'utilisateur
-        line = readline(prompt_format());
-        //permet de retrouver une commande exécutée avec les flèches du haut et du bas
-        add_history(line);
-
-        int nb_args = split_line(line);
-        int joker_return_value = joker(nb_args, args);
-        if(joker_return_value == -1){
-            continue;
-        }
-        nb_args += joker_return_value;
+        line = readline(prompt_format());        
         
+
+
+        //permet de retrouver une commande exécutée avec les flèches du haut et du bas
+        add_history(line);    
+        int nb_args = split_line(line);
+        
+
+        int joker_return_value = joker(nb_args, args);
+
+        if(joker_return_value != -1){
+            nb_args += joker_return_value;
+        }
+
         last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
 
-        //libération de la mémoire du string renvoyé par readline
+        //libération des arguments
+        freeAll(nb_args);
         free(line);
     }
+
+
+        /*char* lineCommandesExternes = line;
+        char lineArray[MAX_ARGS_NUMBER];
+        strcpy(lineArray, lineCommandesExternes);
+        recupererCommandeEtArguments(lineArray);
+        printf("%s\n", commandesEtArgument[1]);*/
+
+
+
+    //Test commandes externs dans le main
+    //args[0] = "cat";
+    //args[1] = "-al";
+    //args[1] = NULL;
+    //args[2] = NULL;
+    //line = "ls -al";
+    //commandesExternes(args);
+
+    /*char* l =  "ls -la jghg";
+    char s[MAX_ARGS_NUMBER];
+    strcpy(s, l);
+    recupererCommandeEtArguments(s);
+    printf("%s\n", commandesEtArgument[2]);*/ 
+
 }
