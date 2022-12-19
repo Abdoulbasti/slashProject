@@ -6,6 +6,8 @@
 #include "pwd/pwd.h"
 #include "constant.h"
 #include "cd/cd.h"
+#include "joker/joker.h"
+#include <stdlib.h>
 #include <stdlib.h>
 #include "commandsExterns/commandesExterns.h"
 
@@ -199,15 +201,6 @@ int main(int argc, char **argv){
         char lineArray[MAX_ARGS_NUMBER];
         strcpy(lineArray, line);
         recupererCommandeEtArguments(lineArray);
-       
-
-
-        /*ici...
-        char lineArray[MAX_ARGS_NUMBER];
-        strcpy(lineArray, line);
-        recupererCommandeEtArguments(lineArray);
-        printf("%s\n", commandesEtArgument[1]);*/
-        
 
 
         //permet de retrouver une commande exécutée avec les flèches du haut et du bas
@@ -217,30 +210,5 @@ int main(int argc, char **argv){
 
         //libération de la mémoire du string renvoyé par readline
         free(line);
-
     }
-
-
-        /*char* lineCommandesExternes = line;
-        char lineArray[MAX_ARGS_NUMBER];
-        strcpy(lineArray, lineCommandesExternes);
-        recupererCommandeEtArguments(lineArray);
-        printf("%s\n", commandesEtArgument[1]);*/
-
-
-
-    //Test commandes externs dans le main
-    //args[0] = "cat";
-    //args[1] = "-al";
-    //args[1] = NULL;
-    //args[2] = NULL;
-    //line = "ls -al";
-    //commandesExternes(args);
-
-    /*char* l =  "ls -la jghg";
-    char s[MAX_ARGS_NUMBER];
-    strcpy(s, l);
-    recupererCommandeEtArguments(s);
-    printf("%s\n", commandesEtArgument[2]);*/ 
-
 }
