@@ -6,18 +6,38 @@ int is_etoile_simple(char* arg){
             return i;
         }
     }
-    return -1;    
+    return -1;
+}
+
+int next_slash(char* arg){
+    for (size_t i = 0; i < strlen(arg); i++){
+        if(arg[i] == '/'){
+            return i;
+        }
+    }
+    return -1;
 }
 
 int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     char path[PATH_MAX];
     strcpy(path, getenv("PWD"));
     char suffixe[MAX_ARGS_STRLEN];
-    strcpy(suffixe, arg + place + 1);
+    char suite[PATH_MAX] = "\0";
+    int place_next_slash = next_slash(arg + place + 1);
+    if( place_next_slash != -1){
+        strcpy(suite, arg + place_next_slash + 1);
+        arg[place_next_slash + 1] = '\0';
+        strcpy(suffixe, arg + place + 1);
+    }else{
+        strcpy(suffixe, arg + place + 1);
+    }
     arg[place] = '\0';
     strcat(path, "/");
     strcat(path, arg);
     path[strlen(path) - 1] = '\0';
+    printf("suite = %s\n", suite);
+    printf("suffixe = %s\n", suffixe);
+    printf("arg = %s\n", arg);
     
     DIR * dir = opendir(path);
     if(dir == NULL){
@@ -34,16 +54,19 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
         || strlen(suffixe) == 0 || entry->d_type == DT_DIR) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name)){
             //char *arg2 = malloc(sizeof(char) * MAX_ARGS_STRLEN );
             strcpy(arg2, arg);
+            printf("arg2 = %s\n", arg2);
             strcat(arg2, entry->d_name);
             int place = -1;
             if(entry->d_type == DT_DIR){
-                strcat(arg2, suffixe);
+                printf("test\n");
+                strcat(arg2, suite);
                 place = is_etoile_simple(arg2);
             }
             if(entry->d_type != DT_DIR && place == -1){
                 argv[num_arg + nb_arg_ajout] = arg2;
                 nb_arg_ajout++;
             }else if(place != -1){
+                printf("test2\n");
                 char copyArg[MAX_ARGS_STRLEN];
                 strcpy(copyArg, arg2);
                 nb_arg_ajout += cherche_prefixe(argv, copyArg, place, num_arg + nb_arg_ajout);
