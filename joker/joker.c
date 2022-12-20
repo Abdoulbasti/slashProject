@@ -6,14 +6,33 @@ int is_etoile_simple(char* arg){
             return i;
         }
     }
-    return -1;    
+    return -1;
+}
+
+int next_slash(char* arg){
+    for (size_t i = 0; i < strlen(arg); i++){
+        if(arg[i] == '/'){
+            return i;
+        }
+    }
+    return -1;
 }
 
 int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     char path[PATH_MAX];
     strcpy(path, getenv("PWD"));
     char suffixe[MAX_ARGS_STRLEN];
-    strcpy(suffixe, arg + place + 1);
+    char suite[PATH_MAX] = "\0";
+    int place_next_slash = next_slash(arg + place + 1);
+    int type = 0;
+    if( place_next_slash != -1){
+        strcpy(suite, arg + place_next_slash + 1);
+        arg[place_next_slash + 1] = '\0';
+        strcpy(suffixe, arg + place + 1);
+        type = DT_DIR;
+    }else{
+        strcpy(suffixe, arg + place + 1);
+    }
     arg[place] = '\0';
     strcat(path, "/");
     strcat(path, arg);
@@ -31,13 +50,14 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     struct dirent * entry;
 	while((entry = readdir(dir)) != NULL){
         if((strcmp(suffixe, (entry->d_name + strlen(entry->d_name) - strlen(suffixe))) == 0 
-        || strlen(suffixe) == 0 || entry->d_type == DT_DIR) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name)){
-            //char *arg2 = malloc(sizeof(char) * MAX_ARGS_STRLEN );
+        || strlen(suffixe) == 0) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name) && 
+        (entry->d_type == type || type == 0)){
+            char *arg2 = malloc(sizeof(char) * MAX_ARGS_STRLEN );
             strcpy(arg2, arg);
             strcat(arg2, entry->d_name);
             int place = -1;
             if(entry->d_type == DT_DIR){
-                strcat(arg2, suffixe);
+                strcat(arg2, suite);
                 place = is_etoile_simple(arg2);
             }
             if(entry->d_type != DT_DIR && place == -1){
@@ -48,10 +68,8 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
                 strcpy(copyArg, arg2);
                 nb_arg_ajout += cherche_prefixe(argv, copyArg, place, num_arg + nb_arg_ajout);
             }
-
         }
     }
-    free(arg2);
  
     return nb_arg_ajout;
 }
@@ -91,5 +109,11 @@ int joker(int argc, char** argv){
        } 
     }
     
+    // for (size_t i = 0; i < args_ajout; i++)
+    // {
+    //     printf("i = %s\n", argv[i]);
+    // }
+    
+
     return args_ajout;
 }
