@@ -22,3 +22,5 @@ int executionCommandesExternesAutres(char* arguments[MAX_ARGS_NUMBER]);
 int executionCommandeExternes(char* arguments[MAX_ARGS_NUMBER]);
 
 int commandesExternes(char* commandes[MAX_ARGS_NUMBER]);
+
+char** allocation();

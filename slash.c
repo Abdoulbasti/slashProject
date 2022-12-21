@@ -8,6 +8,7 @@
 #include "cd/cd.h"
 #include "joker/joker.h"
 #include <stdlib.h>
+#include <string.h>
 #include "commandsExterns/commandesExterns.h"
 
 char prompt_msg[100];       //Message du prompt
@@ -166,11 +167,15 @@ int interpretation_command(int argc){
     else
     {
         char* argvTmp[MAX_ARGS_STRLEN];
+        //initialisation des champs
+        for(int k = 0; k<=MAX_ARGS_STRLEN; k++)
+        {
+            argvTmp[k] = NULL;
+        }
         argvTmp[0] = command;
         for (size_t i = 0; i < argc; i++){
             argvTmp[i+1] = args[i];
         }
-        
         return commandesExternes(argvTmp);
     }
     

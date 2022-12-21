@@ -1,6 +1,19 @@
 #include "commandesExterns.h"
 
 
+
+
+char** allocation()
+{
+    char** argument = (char**) malloc(MAX_ARGS_NUMBER * sizeof(char*));
+
+    for(int i = 0; i< MAX_ARGS_NUMBER; i++)
+    {
+        argument[i] = NULL;
+    }
+    return argument;
+}
+
 void gestionErreur(char* nomFonction)
 {
     perror(nomFonction);
@@ -57,6 +70,7 @@ l'utilisateur.
 int commandesExternes(char* commandes[MAX_ARGS_NUMBER])
 
 {
+    
     char* nomFonction = "fork";
     
     pid_t pid = fork();
