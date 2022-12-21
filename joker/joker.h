@@ -21,6 +21,12 @@ int is_etoile_simple(char* argv);
 */
 int next_slash(char* arg);
 
+
+/*
+* Renvoie 1 si le fichier correspondant à arg existe et 0 sinon.
+*/
+int check_file_exist(char* arg);
+
 /*
 * argv: la list des arguments
 * arg: une copie de l'argument partiellement transformé ou pas

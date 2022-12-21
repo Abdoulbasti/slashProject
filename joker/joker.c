@@ -18,6 +18,42 @@ int next_slash(char* arg){
     return -1;
 }
 
+int last_slash(char* arg){
+    for (size_t i = strlen(arg) - 1; i >= 0 ; i--){
+        if(arg[i] == '/'){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int check_file_exist(char* arg){
+    int place = last_slash(arg);
+    if(place == -1){
+        return 0;
+    }
+    char filename[MAX_ARGS_STRLEN];
+    char path[PATH_MAX];
+    strcpy(filename, place + arg + 1);
+    strcpy(path, getenv("PWD"));
+    strcat(path, "/");
+    strncat(path, arg, place);
+
+    //On essaye d'ouvrir le dossier correspondant à path
+    DIR * dir = opendir(path);
+    if(dir == NULL){
+        return 0;
+    }
+
+    struct dirent * entry;
+    while((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, filename) == 0){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     char path[PATH_MAX];    //Chemin absolu
     strcpy(path, getenv("PWD"));
@@ -47,6 +83,11 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     strcat(path, arg);
     //On enlève le slash à la fin
     path[strlen(path) - 1] = '\0';
+
+    //Si il y a une étoile dans le suffixe on renvoi 0
+    if(is_etoile_simple(suffixe) != -1){
+        return 0;
+    }
     
     //On essaye d'ouvrir le dossier correspondant à path
     DIR * dir = opendir(path);
@@ -70,20 +111,33 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
             strcpy(arg2, arg);
             strcat(arg2, entry->d_name);
             int place = -1; //Place de la première étoile de l'arg
+
             //Si l'entrée est un dossier on ajoute la suite à l'arg et vérifi si il n'y a pas d'autres étoiles
             if(entry->d_type == DT_DIR){
                 strcat(arg2, suite);
                 place = is_etoile_simple(arg2);
             }
+
             //Si l'entrée n'est pas un dossier on ajoute le fichier aux arguments
             if(entry->d_type != DT_DIR && place == -1){
                 argv[num_arg + nb_arg_ajout] = arg2;
                 nb_arg_ajout++;
+
             //Si l'entrée est un fichier et qu'il y a une autre étoile on continu de chercher
             }else if(place != -1){
                 char copyArg[MAX_ARGS_STRLEN];
                 strcpy(copyArg, arg2);
+                free(arg2);
                 nb_arg_ajout += cherche_prefixe(argv, copyArg, place, num_arg + nb_arg_ajout);
+
+            //Si l'entrée est un fichier et qu'il n'y a pas d'étoile
+            }else{
+                if(check_file_exist(arg2) == 1){
+                    argv[num_arg + nb_arg_ajout] = arg2;
+                    nb_arg_ajout++;
+                }else{
+                    free(arg2);
+                }
             }
         }
     }
@@ -134,7 +188,7 @@ int joker(int argc, char** argv){
     
     // for (size_t i = 0; i < args_ajout; i++)
     // {
-    //     printf("%d = %s\n", i, argv[i]);
+    //     printf("%ld = %s\n", i, argv[i]);
     // }
     
 
