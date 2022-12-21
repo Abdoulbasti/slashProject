@@ -19,7 +19,7 @@ int next_slash(char* arg){
 }
 
 int last_slash(char* arg){
-    for (size_t i = strlen(arg) - 1; i >= 0 ; i--){
+    for (size_t i = strlen(arg) - 1; i > -1 ; i--){
         if(arg[i] == '/'){
             return i;
         }
@@ -30,7 +30,7 @@ int last_slash(char* arg){
 int check_file_exist(char* arg){
     int place = last_slash(arg);
     if(place == -1){
-        return 0;
+        return 1;
     }
     char filename[MAX_ARGS_STRLEN];
     char path[PATH_MAX];
@@ -48,9 +48,11 @@ int check_file_exist(char* arg){
     struct dirent * entry;
     while((entry = readdir(dir)) != NULL){
         if(strcmp(entry->d_name, filename) == 0){
+            closedir(dir);
             return 1;
         }
     }
+    closedir(dir);
     return 0;
 }
 
@@ -105,8 +107,8 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
 
         //Si le suffixe et le type correspondent et qu'il nest pas dir ou son père
         if((strcmp(suffixe, (entry->d_name + strlen(entry->d_name) - strlen(suffixe))) == 0 
-        || strlen(suffixe) == 0) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name) && 
-        (entry->d_type == type || type == 0)){
+        || strlen(suffixe) == 0) && strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name)
+        && entry->d_name[0] != '.'){
             char *arg2 = malloc(sizeof(char) * MAX_ARGS_STRLEN );
             strcpy(arg2, arg);
             strcat(arg2, entry->d_name);
@@ -141,7 +143,8 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
             }
         }
     }
- 
+    
+    closedir(dir);
     return nb_arg_ajout;
 }
 
@@ -158,7 +161,7 @@ int joker(int argc, char** argv){
     }
     int nbEtoiles = 0;
     int args_ajout = 0; //nbr d'arguments rajoutés
-    int place = -1;     //place de la première étoile de l'arg i
+    int place = 0;     //place de la première étoile de l'arg i
     for (size_t i = 0; i < argc; i++){
         place = is_etoile_simple(argv2[i]);
         //Il y a une étoile on applique `cherche_prefixe` sur l'arg
