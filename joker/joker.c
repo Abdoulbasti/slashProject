@@ -19,7 +19,7 @@ int next_slash(char* arg){
 }
 
 int last_slash(char* arg){
-    for (size_t i = strlen(arg) - 1; i > -1 ; i--){
+    for (int i = strlen(arg) - 1; i >= 0 ; i--){
         if(arg[i] == '/'){
             return i;
         }
@@ -29,15 +29,20 @@ int last_slash(char* arg){
 
 int check_file_exist(char* arg){
     int place = last_slash(arg);
-    if(place == -1){
-        return 1;
+    if(arg[strlen(arg) - 1] == '/'){
+        arg[strlen(arg) - 1] = '\0';
+        place = last_slash(arg);
     }
+
     char filename[MAX_ARGS_STRLEN];
     char path[PATH_MAX];
     strcpy(filename, place + arg + 1);
     strcpy(path, getenv("PWD"));
-    strcat(path, "/");
-    strncat(path, arg, place);
+
+    if(place != -1){
+      strcat(path, "/");
+        strncat(path, arg, place);  
+    }
 
     //On essaye d'ouvrir le dossier correspondant à path
     DIR * dir = opendir(path);
@@ -62,15 +67,15 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     char suffixe[MAX_ARGS_STRLEN];
     char suite[PATH_MAX] = "\0";
     //On recherche si il y a un slash après l'étoile
-    int place_next_slash = next_slash(arg + place + 1);
+    int place_next_slash = next_slash(arg + place);
     int type = 0;   //Si type = DT_DIR alors on recherche un dossier sinon un fichier
 
     //On recherche un dossier si il y a un slash après l'étoile
     if( place_next_slash != -1){
         //On garde la partie à partir du slash dans suite
-        strcpy(suite, arg + place_next_slash + 1);
+        strcpy(suite, arg + place_next_slash + 1 + place);
         //On coupe l'arg au niveau du slash pour garder le suffixe
-        arg[place_next_slash + 1] = '\0';
+        arg[place_next_slash + place] = '\0';
         //On garde le suffix du nom du dossier
         strcpy(suffixe, arg + place + 1);
         //On précise qu'on cherche un dossier
@@ -91,12 +96,12 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
         return 0;
     }
     
+
     //On essaye d'ouvrir le dossier correspondant à path
     DIR * dir = opendir(path);
     if(dir == NULL){
         return 0;
     }
-
 
     char * arg2;
     int nb_arg_ajout = 0;
@@ -116,6 +121,7 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
 
             //Si l'entrée est un dossier on ajoute la suite à l'arg et vérifi si il n'y a pas d'autres étoiles
             if(entry->d_type == DT_DIR){
+                strcat(arg2, "/");
                 strcat(arg2, suite);
                 place = is_etoile_simple(arg2);
             }
@@ -167,7 +173,7 @@ int joker(int argc, char** argv){
         //Il y a une étoile on applique `cherche_prefixe` sur l'arg
         if(place != -1){
             nbEtoiles++;
-            args_ajout += cherche_prefixe(argv, argv2[i], place, i + args_ajout);
+            args_ajout += cherche_prefixe(argv, argv2[i], place, args_ajout);
         //Il n'y a pas d'étoile on ajoute simplement l'argument
         }else{
             argv[i + args_ajout] = (char*) argv2[i];
