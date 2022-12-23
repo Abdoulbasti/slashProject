@@ -17,24 +17,24 @@
 
 
 //cmd > fic
-void redirectionStdoutSansEcrasement(char* nomFichier);
+void redirectionsStdoutSansEcrasement(char* nomFichier);
 
 //cmd >| fic
-void redirectionStdoutAvecEcrasement(char* nomFichier);
+void redirectionsStdoutAvecEcrasement(char* nomFichier);
 
 //cmd >> fic
-void redirectionStdoutEnConcatenation(char* nomFichier);
+void redirectionsStdoutEnConcatenation(char* nomFichier);
 
 
 
 //cmd 2>> fic
-void redirectionStderrEnConctenation(char* nomFichier);
+void redirectionsStderrEnConctenation(char* nomFichier);
 
 //cmd 2> fic
-void redirectionStderrSansEcrasement(char* nomFichier);
+void redirectionsStderrSansEcrasement(char* nomFichier);
 
 //cmd 2>| fic
-void redirectionStderrAvecEcrasement(char* nomFichier);
+void redirectionsStderrAvecEcrasement(char* nomFichier);
 
 
 
@@ -48,25 +48,35 @@ int ouvertureFichierSansEcrasement(char* nomFichier);
 
 
 
+int ouvertureFichierStdin(char* nomFichier);
+
+
 //cmd < fic
-void redirectionsStdin(int fd);
+void redirectionsStdin(char* nomFichier);
 
 //cmd1 | cmd2   et cmd1 | cmd2 | ... | cmdn
 void redirectionsPipe(char* monFichier);
 
 //void redirectionStdout(char* commandesIntvoid redirectionStdout(char* commandesInternesExternes[MAX_ARGS_NUMBER], char* redirection, char* nomFichier);ernesExternes[MAX_ARGS_NUMBER], char* redirection, char* nomFichier);
 
-void redirectionStdout(char* redirection, char* nomFichier);
+void redirectionsStdout(char* redirection, char* nomFichier);
 
-void redirectionStderr(char* redirection, char* nomFichier);
+void redirectionsStderr(char* redirection, char* nomFichier);
+
+
+
+
 
 
 int main(int argc, char** argv)
 {
-
-    redirectionStderr("2>>", "fic1.txt");
-    char* buff = "Ceci est un autre message3\n";
-    write(2, buff, strlen(buff));
+    redirectionsStdin(argv[1]);
+    
+    int r =execlp("cat", "cat", NULL);
+    if(r==-1)
+    {
+        perror("execl");
+    }
 
     return 0;
 }
@@ -115,10 +125,27 @@ int ouvertureFichierAvecEcrasement(char* nomFichier)
     return fd;
 }
 
+//Test ok
+int ouvertureFichierStdin(char* nomFichier)
+{
+    mode_t mode = 0666;
+    
+    int fd = open(nomFichier, O_RDONLY | O_CREAT, mode);
+
+    if(fd == -1){   gestionErreur("open ");}
+
+    return fd;
+}
+
+int ouvertureFichierPipe(char* nomFichier)
+{   
+
+}
+
 
 /*REDIRECTIONS DE LA STDOUT*/
 //Test ok
-void redirectionStdoutSansEcrasement(char* nomFichier)
+void redirectionsStdoutSansEcrasement(char* nomFichier)
 {
     int fd = ouvertureFichierSansEcrasement(nomFichier);
     int retourDup = dup2(fd, STDOUT_FILENO);
@@ -127,7 +154,7 @@ void redirectionStdoutSansEcrasement(char* nomFichier)
 }
 
 //Test ok
-void redirectionStdoutAvecEcrasement(char* nomFichier)
+void redirectionsStdoutAvecEcrasement(char* nomFichier)
 {
     int fd = ouvertureFichierAvecEcrasement(nomFichier);
     int retourDup = dup2(fd, STDOUT_FILENO);
@@ -136,7 +163,7 @@ void redirectionStdoutAvecEcrasement(char* nomFichier)
 }
 
 //Test ok
-void redirectionStdoutEnConcatenation(char* nomFichier)
+void redirectionsStdoutEnConcatenation(char* nomFichier)
 {
     int fd = ouvertureFichierEnConcatenation(nomFichier);
     int retourDup = dup2(fd, STDOUT_FILENO);
@@ -148,7 +175,7 @@ void redirectionStdoutEnConcatenation(char* nomFichier)
 
 /*REDIRECTIONS DE LA STDERR*/
 //Test ok
-void redirectionStderrEnConctenation(char* nomFichier)
+void redirectionsStderrEnConctenation(char* nomFichier)
 {
     int fd = ouvertureFichierEnConcatenation(nomFichier);
     int retourDup = dup2(fd, STDERR_FILENO);
@@ -157,7 +184,7 @@ void redirectionStderrEnConctenation(char* nomFichier)
 }
 
 //Test ok
-void redirectionStderrSansEcrasement(char* nomFichier)
+void redirectionsStderrSansEcrasement(char* nomFichier)
 {
     int fd = ouvertureFichierSansEcrasement(nomFichier);
     int retourDup = dup2(fd, STDERR_FILENO);
@@ -166,7 +193,7 @@ void redirectionStderrSansEcrasement(char* nomFichier)
 }
 
 //Test ok
-void redirectionStderrAvecEcrasement(char* nomFichier)
+void redirectionsStderrAvecEcrasement(char* nomFichier)
 {
     int fd = ouvertureFichierAvecEcrasement(nomFichier);
     int retourDup = dup2(fd, STDERR_FILENO);
@@ -175,6 +202,24 @@ void redirectionStderrAvecEcrasement(char* nomFichier)
 }
 
 
+/*REDIRECTION DE LA STDIN*/
+//Test ok
+void redirectionsStdin(char* nomFichier)
+{
+    int fd = ouvertureFichierStdin(nomFichier);
+    int retourDup = dup2(fd, STDIN_FILENO);
+
+    if(retourDup == -1) {gestionErreur("dup2 ");}
+}
+
+
+
+//cmd1 | cmd2   et cmd1 | cmd2 | ... | cmdn
+void redirectionsPipe(char* monFichier)
+{
+
+}
+
 
 /*
 1. Effectuer la redirection
@@ -182,7 +227,7 @@ void redirectionStderrAvecEcrasement(char* nomFichier)
 */
 
 //Test ok
-void redirectionStdout(char* redirections, char* nomFichier)
+void redirectionsStdout(char* redirections, char* nomFichier)
 {
     int statusSansEcrasement = strcmp(redirections, ">");
     int statusAvecEcrasement = strcmp(redirections, ">|");
@@ -190,17 +235,17 @@ void redirectionStdout(char* redirections, char* nomFichier)
     
     if(statusSansEcrasement == 0)
     {
-        redirectionStdoutSansEcrasement(nomFichier);
+        redirectionsStdoutSansEcrasement(nomFichier);
     }
     else
     if(statusAvecEcrasement == 0)
     {
-        redirectionStdoutAvecEcrasement(nomFichier);
+        redirectionsStdoutAvecEcrasement(nomFichier);
     }
     else
     if(statusEnConcatenation == 0)
     {
-        redirectionStdoutEnConcatenation(nomFichier);
+        redirectionsStdoutEnConcatenation(nomFichier);
     }
     else 
     {
@@ -211,7 +256,7 @@ void redirectionStdout(char* redirections, char* nomFichier)
 
 
 //Test ok
-void redirectionStderr(char* redirections, char* nomFichier)
+void redirectionsStderr(char* redirections, char* nomFichier)
 {
     int statusSansEcrasement = strcmp(redirections, "2>");
     int statusAvecEcrasement = strcmp(redirections, "2>|");
@@ -219,17 +264,17 @@ void redirectionStderr(char* redirections, char* nomFichier)
     
     if(statusSansEcrasement == 0)
     {
-        redirectionStderrSansEcrasement(nomFichier);
+        redirectionsStderrSansEcrasement(nomFichier);
     }
     else
     if(statusAvecEcrasement == 0)
     {
-        redirectionStderrAvecEcrasement(nomFichier);
+        redirectionsStderrAvecEcrasement(nomFichier);
     }
     else
     if(statusEnConcatenation == 0)
     {
-        redirectionStderrEnConctenation(nomFichier);
+        redirectionsStderrEnConctenation(nomFichier);
     }
     else 
     {
