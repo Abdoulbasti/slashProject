@@ -39,7 +39,7 @@ int last_slash(char* arg){
 char *  del_double_slash(char* arg){
     int len = strlen(arg);
     int len2 = 0;
-    char* arg2 = (char*) malloc(sizeof(char) * PATH_MAX);
+    char arg2[PATH_MAX];
     for (size_t i = 0; i < len; i++){
         if(i < len - 1 && arg[i] == '/'){
             if(arg[i + 1] != '/'){
@@ -52,8 +52,8 @@ char *  del_double_slash(char* arg){
         }
     }
     arg2[len2] = '\0';
-    free(arg);
-    return arg2;
+    strcpy(arg, arg2);
+    return arg;
 }
 
 int check_file_exist(char* arg){
@@ -197,6 +197,7 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
 int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
     char path[PATH_MAX];    //Chemin absolu
     char preffix[PATH_MAX];
+    strcpy(preffix, preffixTmp);
     strcpy(path, getenv("PWD"));
     strcat(path, preffix);
     
@@ -213,9 +214,9 @@ int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
     int place = is_etoile_simple(arg);
     int nb_arg_ajout = 0;
     struct dirent * entry;
-    
+
     while ((entry = readdir(dir)) != NULL){
-        printf("entry = %s : type = %d\n", entry->d_name, type);
+        //printf("entry = %s : type = %d\n", entry->d_name, type);
         //Quand on cherche un dossier est que entry est un dossier ou qu'on ne cherche pas de dossier
         if(((type == DT_DIR && entry->d_type == DT_DIR) || type != DT_DIR) && strcmp(".", entry->d_name) != 0 
         && strcmp("..", entry->d_name) && entry->d_name[0] != '.'){
@@ -227,8 +228,10 @@ int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
             }
             char* argTmp = (char*) malloc(sizeof(char) * PATH_MAX);
             strcpy(argTmp, preffix);
-            strcat(argTmp, arg + 1);
-            printf("pref = %s, argTmp = %s\n", preffix, argTmp);
+            if(strlen(arg) > 0){
+                strcat(argTmp, arg + 1);
+            }
+            //printf("pref = %s, argTmp = %s, arg = %s\n", preffix, argTmp, arg);
 
             //Quand il y a une étoile dans l'arg
             if(place != -1){
@@ -278,8 +281,8 @@ int joker(int argc, char** argv){
             if(return_value_recherche > 0){
                 args_ajout += return_value_recherche - 1;
                 nbEtoiles++;
+                free(_2b3);
             }
-            free(_2b3);
 
         }else{
             place = is_etoile_simple(argv2[i]);
@@ -311,11 +314,11 @@ int joker(int argc, char** argv){
        } 
     }
     
-    printf("args_aj = %d\n", args_ajout);
-    for (size_t i = 0; i < args_ajout; i++)
-    {
-        printf("%ld = %s\n", i, argv[i]);
-    }
+    // printf("args_aj = %d\n", args_ajout);
+    // for (size_t i = 0; i < args_ajout; i++)
+    // {
+    //     printf("%ld = %s\n", i, argv[i]);
+    // }
     
 
     return args_ajout;
