@@ -9,6 +9,15 @@ int is_etoile_simple(char* arg){
     return -1;
 }
 
+int is_etoile_double(char* arg){
+    if(strlen(arg) >= 2){
+        if(arg[0] == '*' && arg[1] == '*'){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int next_slash(char* arg){
     for (size_t i = 0; i < strlen(arg); i++){
         if(arg[i] == '/'){
@@ -185,32 +194,105 @@ int cherche_prefixe(char** argv, char* arg, int place, int num_arg){
     return nb_arg_ajout;
 }
 
+int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
+    char path[PATH_MAX];    //Chemin absolu
+    char preffix[PATH_MAX];
+    strcpy(path, getenv("PWD"));
+    strcat(path, preffix);
+    
+    DIR * dir = opendir(path); 
+    if(dir == NULL){
+        return 0;
+    }
+
+    int type = 0;
+    if(arg[0] == '/'){
+        type = DT_DIR;
+    }
+
+    int place = is_etoile_simple(arg);
+    int nb_arg_ajout = 0;
+    struct dirent * entry;
+    
+    while ((entry = readdir(dir)) != NULL){
+        printf("entry = %s : type = %d\n", entry->d_name, type);
+        //Quand on cherche un dossier est que entry est un dossier ou qu'on ne cherche pas de dossier
+        if(((type == DT_DIR && entry->d_type == DT_DIR) || type != DT_DIR) && strcmp(".", entry->d_name) != 0 
+        && strcmp("..", entry->d_name) && entry->d_name[0] != '.'){
+
+            strcpy(preffix, preffixTmp);
+            strcat(preffix, entry->d_name);
+            if(entry->d_type == DT_DIR){
+                strcat(preffix, "/");
+            }
+            char* argTmp = (char*) malloc(sizeof(char) * PATH_MAX);
+            strcpy(argTmp, preffix);
+            strcat(argTmp, arg + 1);
+            printf("pref = %s, argTmp = %s\n", preffix, argTmp);
+
+            //Quand il y a une étoile dans l'arg
+            if(place != -1){
+
+                nb_arg_ajout += cherche_prefixe(argv, argTmp, place + strlen(preffix) - 1, num_arg + nb_arg_ajout);
+                free(argTmp);
+
+            //Quand il n'y a pas d'étoile d'ans l'arg
+            }else{
+                if(check_file_exist(argTmp)){
+                    argv[num_arg + nb_arg_ajout] = argTmp;
+                    nb_arg_ajout++;
+                }else{
+                    free(argTmp);
+                }
+            }
+        }
+        
+        //Si l'entrée est un fichier on recherche dans ce fichier recursivement
+        if(entry->d_type == DT_DIR && strcmp(".", entry->d_name) != 0 
+        && strcmp("..", entry->d_name) && entry->d_name[0] != '.' && place != -1){
+            char* preffixTmp;
+            strcpy(preffixTmp, preffix);
+            strcat(preffixTmp, entry->d_name);
+            strcat(preffixTmp, "/");
+            nb_arg_ajout += recherche_recursive(argv, arg, num_arg + nb_arg_ajout, preffix);
+        }
+    }
+    return nb_arg_ajout;
+}
+
 int joker(int argc, char** argv){
-    //copie argv pour les utilisés dans cherche_prefixe
+    //copie (des pointeurs) argv pour les utilisés dans cherche_prefixe
     char* argv2[MAX_ARGS_NUMBER];
     for (size_t i = 0; i < argc; i++){
         argv2[i] = argv[i];
-    }
-    //copie argv pour les remettre dans argv si il n'y a pas d'argument à la fin
-    char* argv3[MAX_ARGS_NUMBER];
-    for (size_t i = 0; i < argc; i++){
-        argv3[i] = argv[i];
     }
     int nbEtoiles = 0;
     int args_ajout = 0; //nbr d'arguments rajoutés
     int place = 0;     //place de la première étoile de l'arg i
     for (size_t i = 0; i < argc; i++){
         argv2[i] = del_double_slash(argv2[i]);
-        place = is_etoile_simple(argv2[i]);
-        //Il y a une étoile on applique `cherche_prefixe` sur l'arg
-        if(place != -1){
-            nbEtoiles++;
-            char * a_supp = argv2[i];
-            args_ajout += cherche_prefixe(argv, argv2[i], place, args_ajout);
-            free(a_supp);
-        //Il n'y a pas d'étoile on ajoute simplement l'argument
+
+        if(is_etoile_double(argv2[i])){
+            char * _2b3 = argv2[i];
+            int return_value_recherche = recherche_recursive(argv, argv2[i] + 2, args_ajout, "");
+            if(return_value_recherche > 0){
+                args_ajout += return_value_recherche - 1;
+                nbEtoiles++;
+            }
+            free(_2b3);
+
         }else{
-            argv[i + args_ajout] = (char*) argv2[i];
+            place = is_etoile_simple(argv2[i]);
+            //Il y a une étoile on applique `cherche_prefixe` sur l'arg
+            if(place != -1){
+                nbEtoiles++;
+                char * a_supp = argv2[i];
+                args_ajout += cherche_prefixe(argv, argv2[i], place, args_ajout);
+                free(a_supp);
+            //Il n'y a pas d'étoile on ajoute simplement l'argument
+            }else{
+                argv[i + args_ajout] = (char*) argv2[i];
+            }
         }
     }
 
@@ -229,10 +311,11 @@ int joker(int argc, char** argv){
        } 
     }
     
-    // for (size_t i = 0; i < args_ajout; i++)
-    // {
-    //     printf("%ld = %s\n", i, argv[i]);
-    // }
+    printf("args_aj = %d\n", args_ajout);
+    for (size_t i = 0; i < args_ajout; i++)
+    {
+        printf("%ld = %s\n", i, argv[i]);
+    }
     
 
     return args_ajout;

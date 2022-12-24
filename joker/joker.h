@@ -9,18 +9,29 @@ int joker(int argc, char** argv);
 
 
 /*
- * prend une chaine de caractère et la position de la première étoile si il y en a une
+ * prend une chaine de caractère et renvoie la position de la première étoile si il y en a une
  * et renvoi -1 sinon
 */
 int is_etoile_simple(char* argv);
 
 
 /*
- * prend une chaine de caractère et la position du premier slash si il y en a un
+ * prend une chaine de caractère et renvoie la position du premier slash si il y en a un
  * et renvoi -1 sinon
 */
 int next_slash(char* arg);
 
+/*
+ * prend une chaine de caractère et renvoie la position du dernier slash si il y en a un
+ * et renvoi -1 sinon
+*/
+int last_slash(char* arg);
+
+/*
+* prend un pointeur sur une chaine de caractère en argument et revoie un pointeur sur cette chaine de
+* caractères en enlevant tous les sash en trop ("a//b" -> "a/b" ; "a////////b" -> "a/b")
+*/
+char *  del_double_slash(char* arg);
 
 /*
 * Renvoie 1 si le fichier correspondant à arg existe et 0 sinon.
