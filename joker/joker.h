@@ -50,3 +50,13 @@ int check_file_exist(char* arg);
 * allouant avec malloc() un espace
 */
 int cherche_prefixe(char** argv, char* arg, int place, int num_arg);
+
+/*
+* argv: la list des arguments
+* arg: une copie de l'argument partiellement transformé ou pas
+* num_arg: la place de l'argument dans arv
+* preffixTmp: doit être initialisé à "" au premier lancement et s'actualise seul
+* recherche récursivement tous les dossiers corespondant à la forme *\/*\/...*\/*\/...
+* quand il y a le préfixe ** dans arg
+*/
+int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp);

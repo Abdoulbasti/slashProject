@@ -199,6 +199,7 @@ int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
     char preffix[PATH_MAX];
     strcpy(preffix, preffixTmp);
     strcpy(path, getenv("PWD"));
+    strcat(path, "/");
     strcat(path, preffix);
     
     DIR * dir = opendir(path); 
@@ -216,7 +217,6 @@ int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
     struct dirent * entry;
 
     while ((entry = readdir(dir)) != NULL){
-        //printf("entry = %s : type = %d\n", entry->d_name, type);
         //Quand on cherche un dossier est que entry est un dossier ou qu'on ne cherche pas de dossier
         if(((type == DT_DIR && entry->d_type == DT_DIR) || type != DT_DIR) && strcmp(".", entry->d_name) != 0 
         && strcmp("..", entry->d_name) && entry->d_name[0] != '.'){
@@ -252,11 +252,7 @@ int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
         
         //Si l'entrée est un fichier on recherche dans ce fichier recursivement
         if(entry->d_type == DT_DIR && strcmp(".", entry->d_name) != 0 
-        && strcmp("..", entry->d_name) && entry->d_name[0] != '.' && place != -1){
-            char* preffixTmp;
-            strcpy(preffixTmp, preffix);
-            strcat(preffixTmp, entry->d_name);
-            strcat(preffixTmp, "/");
+        && strcmp("..", entry->d_name) && entry->d_name[0] != '.'){
             nb_arg_ajout += recherche_recursive(argv, arg, num_arg + nb_arg_ajout, preffix);
         }
     }
@@ -279,7 +275,7 @@ int joker(int argc, char** argv){
             char * _2b3 = argv2[i];
             int return_value_recherche = recherche_recursive(argv, argv2[i] + 2, args_ajout, "");
             if(return_value_recherche > 0){
-                args_ajout += return_value_recherche - 1;
+                args_ajout += return_value_recherche;
                 nbEtoiles++;
                 free(_2b3);
             }
