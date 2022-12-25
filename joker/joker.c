@@ -277,8 +277,13 @@ int joker(int argc, char** argv){
             if(return_value_recherche > 0){
                 args_ajout += return_value_recherche;
                 nbEtoiles++;
-                free(_2b3);
             }
+            place = is_etoile_simple(argv2[i]);
+            if(place != -1){
+                nbEtoiles++;
+                args_ajout += cherche_prefixe(argv, argv2[i] + 3, place, args_ajout);
+            }
+            free(_2b3);
 
         }else{
             place = is_etoile_simple(argv2[i]);
