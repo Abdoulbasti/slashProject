@@ -21,3 +21,4 @@ lienSymbolique
 !redirections/redirections.c
 redirections/*.txt
 redirections/redirections
+redirections/tests

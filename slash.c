@@ -208,11 +208,22 @@ int main(int argc, char **argv){
 
         //permet de retrouver une commande exécutée avec les flèches du haut et du bas
         add_history(line);    
-        int nb_args = split_line(line);
+
+        /*
+        S'il y'a l'existance de au moins un des signes de redirections
+        -On recupère la chaine se trouvant avant le tous premier signe
+        redirections et le metre dans lineAvantRedrection
+        -On applique la toute première redirection vers le fichier concerné,
+        puis 
+        -On effectue un split de lineAvantRedrection(1), 2 et 3
+
+        */
         
-
+        //1
+        int nb_args = split_line(line);
+        //2
         int joker_return_value = joker(nb_args, args);
-
+        //3
         if(joker_return_value != -1){
             nb_args = joker_return_value;
         }
@@ -220,7 +231,10 @@ int main(int argc, char **argv){
         // for (size_t i = 0; i < nb_args; i++){
         //     printf("%ld = %s\n", i, args[i]);
         // }
+
+        /*TRAITEMENTS DES REDIRECTIONS*/
         
+
 
         last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
 
@@ -228,28 +242,4 @@ int main(int argc, char **argv){
         freeAll(nb_args);
         free(line);
     }
-
-
-        /*char* lineCommandesExternes = line;
-        char lineArray[MAX_ARGS_NUMBER];
-        strcpy(lineArray, lineCommandesExternes);
-        recupererCommandeEtArguments(lineArray);
-        printf("%s\n", commandesEtArgument[1]);*/
-
-
-
-    //Test commandes externs dans le main
-    //args[0] = "cat";
-    //args[1] = "-al";
-    //args[1] = NULL;
-    //args[2] = NULL;
-    //line = "ls -al";
-    //commandesExternes(args);
-
-    /*char* l =  "ls -la jghg";
-    char s[MAX_ARGS_NUMBER];
-    strcpy(s, l);
-    recupererCommandeEtArguments(s);
-    printf("%s\n", commandesEtArgument[2]);*/ 
-
 }
