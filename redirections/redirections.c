@@ -76,15 +76,17 @@ void* recupererChaineAvantRedirection(char* line, char* sub_string);
 
 char* recupererChaineApresRedirection(char* line);
 
-void stockerRedirections(char* line, char* stocker[MAX_REDIRECTIONS]);
+void stockerRedirectionsEtFichiers(char* line,char* tabRedirections[MAX_REDIRECTIONS], char* tabFichier[MAX_FICHIERS]);
 
 char** splitChaine(char *str, const char *delimiter);
+
+int entierPaire(int i);
 
 
 int main(int argc, char** argv)
 {
     char* sousChaine = NULL;
-    char* line = "./split.sh 11 < texte > dossier/out 2  %PWD%/dossier/err";
+    char* line = " < texte > dossier/out 2> %PWD%/dossier/err";
 
 
     /*char str[] = "Je suis une chaîne de caractères.";
@@ -98,20 +100,30 @@ int main(int argc, char** argv)
 
     free(substrings);*/
 
-    char* stocker[MAX_REDIRECTIONS];
+    char* redirections[MAX_REDIRECTIONS];
     for(int k = 0; k<MAX_REDIRECTIONS; k++)
     {
-        stocker[k] = NULL;
+        redirections[k] = NULL;
     }
-    stockerRedirections(line, stocker);
 
-    for(int i = 0; i< 10; i++)
-    {   
-        if(stocker[i] != NULL)
-        {
-            printf("%s\n", stocker[i]);  
-        }
+    char* fichiers[MAX_FICHIERS];
+    for(int j = 0; j<MAX_REDIRECTIONS; j++)
+    {
+        fichiers[j] = NULL;
     }
+
+    stockerRedirectionsEtFichiers(line, redirections, fichiers);
+
+    /*for(int i = 0; i< 10; i++)
+    {   
+        if (redirections[i] != NULL && fichiers[i])
+        {
+            //printf("%s\n", redirections[i]);
+            printf("%s", fichiers[i]);
+        }
+    }*/
+    //printf("%s", fichiers[2]);
+    printf("%s", redirections[2]);
 
 
     return 0;
@@ -472,9 +484,11 @@ void* recupererChaineAvantRedirection(char* line, char* sub_string)
 
 
 /*
-Par ordre de presence dans line
+Recupère la une ligne de commande contenant au moins une redirections,
+
 */
-void stockerRedirections(char* line,char* stocker[MAX_REDIRECTIONS])
+//Test ok
+void stockerRedirectionsEtFichiers(char* line,char* tabRedirections[MAX_REDIRECTIONS], char* tabFichier[MAX_FICHIERS])
 {
     if(verifierExisteRedirection(line))
     {
@@ -489,20 +503,49 @@ void stockerRedirections(char* line,char* stocker[MAX_REDIRECTIONS])
                 strcpy(str, line);
                 //strcpy(str, chaineApresPremierRedirection);
                 substrings = splitChaine(str, " ");
+                int indexTab = 0;
 
-                for (int i = 0; substrings[i] != NULL; i++) 
+                for (int n =0; n< MAX_REDIRECTIONS; n++)
                 {
-                    stocker[i] = substrings[i];
-                    printf("Sous-chaîne %d : %s\n", i + 1, substrings[i]);
+                    int tailleMax = 100;
+                    tabRedirections[n] = (char *) malloc(tailleMax* sizeof(char));
+                    tabFichier[n] = (char* ) malloc(tailleMax* sizeof(char));
                 }
 
+                int compteur1 = 0;
+                for (int i = 0; substrings[i] != NULL; i ++) 
+                {
+                    if (entierPaire(i))
+                    {
+                        strcpy(tabRedirections[compteur1], substrings[i]);
+                        compteur1++;
+                    }
+                }
 
-
-
+                int compteur2 = 0;
+                for (int j = 1; substrings[j] != NULL; j ++)
+                {
+                    if (!entierPaire(j))
+                    {
+                        strcpy(tabFichier[compteur2], substrings[j]);
+                        compteur2++;
+                    }
+                }
                 free(substrings);
             }
         }
     }
+}
+
+
+/*Verifie si un entier est paire ou non*/
+//Test ok
+int entierPaire(int i)
+{
+    if ( (i % 2) == 0)
+        return 1;
+    else
+        return 0;
 }
 
 
@@ -534,6 +577,7 @@ void stockerNomFichiers(char* line, char* stockerNomFichier[MAX_FICHIERS])
 {
 
 }
+
 
 
 //Test ok
