@@ -78,17 +78,18 @@ char* recupererChaineApresRedirection(char* line);
 
 void stockerRedirectionsEtFichiers(char* line,char* tabRedirections[MAX_REDIRECTIONS], char* tabFichier[MAX_FICHIERS]);
 
+int compterNombreFichiers(char* line);
+
 char** splitChaine(char *str, const char *delimiter);
 
 int entierPaire(int i);
 
+int verifierFormatRedirection(char* chaineAPartirPremiereRedirection);
+
+int verifierTailleFormatRedirection(char* chaineAPartirPremiereRedirection);
 
 int main(int argc, char** argv)
 {
-    char* sousChaine = NULL;
-    char* line = " < texte > dossier/out 2> %PWD%/dossier/err";
-
-
     /*char str[] = "Je suis une chaîne de caractères.";
     char **substrings;
     int i;
@@ -99,6 +100,9 @@ int main(int argc, char** argv)
     }
 
     free(substrings);*/
+
+    char* sousChaine = NULL;
+    char* line = " < texte > dossier/out 2> %PWD%/dossier/err";
 
     char* redirections[MAX_REDIRECTIONS];
     for(int k = 0; k<MAX_REDIRECTIONS; k++)
@@ -112,7 +116,8 @@ int main(int argc, char** argv)
         fichiers[j] = NULL;
     }
 
-    stockerRedirectionsEtFichiers(line, redirections, fichiers);
+    //stockerRedirectionsEtFichiers(line, redirections, fichiers);
+    verifierFormatRedirection(line);
 
     /*for(int i = 0; i< 10; i++)
     {   
@@ -123,8 +128,23 @@ int main(int argc, char** argv)
         }
     }*/
     //printf("%s", fichiers[2]);
-    printf("%s", redirections[2]);
 
+    /*int n = compterNombreRedirections(line);
+    for(int i = 0; i<n;i++)
+    {
+        if(fichiers[i] != NULL)
+        {
+            printf("%s\n", fichiers[i]);
+        }
+    }*/
+
+    /*for(int i = 0; i<MAX_FICHIERS; i++)
+    {
+        if(fichiers[i] != NULL)
+        {
+            printf("%s\n", fichiers[i]);
+        }
+    }*/
 
     return 0;
 }
@@ -422,6 +442,30 @@ int compterNombreRedirections(char* line)
     return count;
 }
 
+int compterNombreFichiers(char* line)
+{
+    const int nombreRedirections = 7;
+
+    char haystack[100];
+    strcpy(haystack ,line);
+    char* needles[] = { " < ", " > ", " >> ", " >| ", " 2> ", " 2>> ", " 2>| "};
+    int count = 0;
+
+    for(int i = 0; i<nombreRedirections; i++)
+    {
+        char *ptr = haystack;
+        // Boucle de recherche des occurrences de la chaîne courante
+        while ((ptr = strstr(ptr, needles[i])) != NULL) 
+        {
+            count++;
+
+            // Déplacement du pointeur pour continuer la recherche à partir de la fin de la chaîne trouvée
+            ptr += strlen(needles[i]);
+        }
+    }
+    return count;
+}
+
 /*
 Verifie s'il existe au moins un signe de redirection
 */
@@ -451,6 +495,7 @@ int verifierExisteRedirection(char* line)
 }
 
 
+/*Cette fonction recupere la commande à executer*/
 //Test ok
 void* recupererChaineAvantRedirection(char* line, char* sub_string)
 {
@@ -482,6 +527,60 @@ void* recupererChaineAvantRedirection(char* line, char* sub_string)
 
 
 
+/*Verifie si le format de redirection recuperer est correcte ou pas.
+Le format de redirection est le suivant : red1 fichier1 red2 fichier2 red3 fichier3 ... redN fichierN
+*/
+
+int verifierFormatRedirection(char* chaineAPartirPremiereRedirection)
+{
+    //Si la taille des redirections est paire 
+    if(verifierTailleFormatRedirection(chaineAPartirPremiereRedirection))
+    {
+        if(redirectionOrdonee(chaineAPartirPremiereRedirection))
+        {
+            return 1;
+        }
+        else 
+        {
+            printf("Au moins un fichier ou redirection n'est pas au bon emplacement,\
+            donner un redirections correcte svp\n");
+            return 0;
+        }
+    }
+    else 
+    {
+        printf("Format de redirection est incorrecte, ça doit être qlq chose paire.\
+        vous avez mis une redirections ou un fichier en trop.\n");
+    }
+
+
+    return 1;
+}
+
+int redirectionOrdonee(char* chaineAPartirPremiereRedirection)
+{
+    
+}
+
+/*Cet format de redirection doit être paire*/
+//Test ok
+int verifierTailleFormatRedirection(char* chaineAPartirPremiereRedirection)
+{
+    char **substrings;
+    char str[200];
+    strcpy(str, chaineAPartirPremiereRedirection);
+    substrings = splitChaine(str, " ");
+
+    int i = 0;
+    while(substrings[i] != NULL)
+    {    i++;   }
+    
+    if(entierPaire(i))
+    {   return 1;   }
+    else
+    {   return 0;   }
+}
+
 
 /*
 Recupère la une ligne de commande contenant au moins une redirections,
@@ -498,6 +597,8 @@ void stockerRedirectionsEtFichiers(char* line,char* tabRedirections[MAX_REDIRECT
             char* chaineApresPremierRedirection = recupererChaineApresRedirection(line);
             if(chaineApresPremierRedirection != NULL)
             {
+                //Verifier le format de redirection
+
                 char **substrings;
                 char str[200];
                 strcpy(str, line);
@@ -572,14 +673,7 @@ char **splitChaine(char *str, const char *delimiter) {
 }
 
 
-
-void stockerNomFichiers(char* line, char* stockerNomFichier[MAX_FICHIERS])
-{
-
-}
-
-
-
+/*Recuperer la chaine à partir de la toute premier signe de redirection*/
 //Test ok
 char* recupererChaineApresRedirection(char* line)
 {
@@ -592,12 +686,13 @@ char* recupererChaineApresRedirection(char* line)
     {
         for (int i = 0; i<nombreRedirections; i++)
         {
-            char *ptr = haystack;   
+            char *ptr = haystack;
             if((ptr = strstr(ptr, needles[i])) != NULL)
             {                   
                 return ptr;
             }
         }  
     }
+    else {  printf("Veuillez entrée un signe de redirection\n");    }
     return NULL;
 }
