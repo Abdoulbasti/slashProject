@@ -88,6 +88,9 @@ int verifierFormatRedirection(char* chaineAPartirPremiereRedirection);
 
 int verifierTailleFormatRedirection(char* chaineAPartirPremiereRedirection);
 
+
+int redirectionOrdonee(char* chaineAPartirPremiereRedirection);
+
 int main(int argc, char** argv)
 {
     /*char str[] = "Je suis une chaîne de caractères.";
@@ -102,9 +105,12 @@ int main(int argc, char** argv)
     free(substrings);*/
 
     char* sousChaine = NULL;
-    char* line = " < texte > dossier/out 2> %PWD%/dossier/err";
+    char* line = " < texte > dossier/out 2> %PWD%/dossier/err < text >> text";
 
-    char* redirections[MAX_REDIRECTIONS];
+    verifierFormatRedirection(line);
+    //printf("bool : %d\n", redirectionOrdonee(line));
+
+    /*char* redirections[MAX_REDIRECTIONS];
     for(int k = 0; k<MAX_REDIRECTIONS; k++)
     {
         redirections[k] = NULL;
@@ -114,10 +120,10 @@ int main(int argc, char** argv)
     for(int j = 0; j<MAX_REDIRECTIONS; j++)
     {
         fichiers[j] = NULL;
-    }
+    }*/
 
     //stockerRedirectionsEtFichiers(line, redirections, fichiers);
-    verifierFormatRedirection(line);
+    //verifierFormatRedirection(line);
 
     /*for(int i = 0; i< 10; i++)
     {   
@@ -531,6 +537,7 @@ void* recupererChaineAvantRedirection(char* line, char* sub_string)
 Le format de redirection est le suivant : red1 fichier1 red2 fichier2 red3 fichier3 ... redN fichierN
 */
 
+//Test ok
 int verifierFormatRedirection(char* chaineAPartirPremiereRedirection)
 {
     //Si la taille des redirections est paire 
@@ -538,6 +545,7 @@ int verifierFormatRedirection(char* chaineAPartirPremiereRedirection)
     {
         if(redirectionOrdonee(chaineAPartirPremiereRedirection))
         {
+            printf("Le format de la redirection est correct\n");
             return 1;
         }
         else 
@@ -549,17 +557,73 @@ int verifierFormatRedirection(char* chaineAPartirPremiereRedirection)
     }
     else 
     {
-        printf("Format de redirection est incorrecte, ça doit être qlq chose paire.\
-        vous avez mis une redirections ou un fichier en trop.\n");
+        printf("Les commandes de redirections doivent être paire\n");
+        return 0;
     }
-
-
-    return 1;
 }
 
+/*Cette fonction verifie si la les redirections sont au bon format*/
+//Test ok
 int redirectionOrdonee(char* chaineAPartirPremiereRedirection)
 {
-    
+    int boolRedirections = 1;
+    int boolFichiers = 1;
+
+    char **substrings;
+    char str[200];
+    strcpy(str, chaineAPartirPremiereRedirection);
+    substrings = splitChaine(str, " ");
+
+    int i = 0;
+    while(substrings[i] != NULL)
+    {   
+        if(entierPaire(i))
+        {
+            //Si ce qui est à l'indice i est un est une redirection
+            if(
+                strcmp(substrings[i],   "<")  ==0    ||
+                strcmp(substrings[i],   ">")  ==0    ||
+                strcmp(substrings[i],   ">|") ==0    ||
+                strcmp(substrings[i],   "2>") ==0    ||
+                strcmp(substrings[i],   ">>") ==0    ||
+                strcmp(substrings[i],   "2>>")==0    ||
+                strcmp(substrings[i],   "2>>")==0
+            )
+            {
+                //QLQ CHOSE...
+                boolRedirections = boolRedirections && 1;
+                i++;
+            }
+            else 
+            {   
+                boolRedirections = boolRedirections && 0;
+                i++;
+            }
+        }
+        else 
+        {
+            // Si ce qu'on à entrée est n'est pas une redirection donc est un fichier
+            if(
+                strcmp(substrings[i],   "<")  !=0    &&
+                strcmp(substrings[i],   ">")  !=0    &&
+                strcmp(substrings[i],   ">|") !=0    &&
+                strcmp(substrings[i],   "2>") !=0    &&
+                strcmp(substrings[i],   ">>") !=0    &&
+                strcmp(substrings[i],   "2>>")!=0    &&
+                strcmp(substrings[i],   "2>>")!=0
+            )
+            {
+                boolFichiers = boolFichiers && 1;
+                i++;
+            }
+            else 
+            {
+                boolFichiers = boolFichiers && 0;
+                i++;
+            }
+        }   
+    }
+    return boolRedirections && boolFichiers;
 }
 
 /*Cet format de redirection doit être paire*/
@@ -695,4 +759,22 @@ char* recupererChaineApresRedirection(char* line)
     }
     else {  printf("Veuillez entrée un signe de redirection\n");    }
     return NULL;
+}
+
+
+
+/*Fonction a appeller dans la slash.
+Cette fonction permet d'appliquer tous redirections sur les fichiers cibles
+*/
+void appliquerRedirections()
+{
+
+}
+
+/*
+Fonction pour executer la commande qui sera rediriger
+*/
+void executerCommande()
+{
+    
 }
