@@ -9,7 +9,8 @@
 #include "joker/joker.h"
 #include <stdlib.h>
 #include <string.h>
-#include "commandsExterns/commandesExterns.h"
+#include "commandesExternes/commandesExternes.h"
+#include <signal.h>
 
 char prompt_msg[100];       //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -30,7 +31,12 @@ char* prompt_format(){
 
     //Dernière commande exécutée
     char last_return_value_str[4];
-    sprintf(last_return_value_str, "%d", last_return_value);
+    if(last_return_value != 255){
+        sprintf(last_return_value_str, "%d", last_return_value);
+    }
+    else{
+        sprintf(last_return_value_str, "%s", "SIG");
+    }
 
     //Couleur (vert: succès / rouge échec)
     char* first_color = "[";
@@ -129,7 +135,6 @@ int interpretation_command(int argc, char commandesAndArguments):
 
 int interpretation_command(int argc){
     //aucune commande
-    
     if (strcmp((const char*) command, (const char*) "") == 0){
         return last_return_value;
     }
@@ -163,7 +168,7 @@ int interpretation_command(int argc){
     }else if(strcmp((const char*) command, (const char*) "false") == 0){
         return 1;
     }
-    //commandes externs
+    //commandes externes
     else
     {
         char* argvTmp[MAX_ARGS_STRLEN];
@@ -196,16 +201,20 @@ void freeAll(int argc){
 }
 
 int main(int argc, char **argv){
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(struct sigaction));
+    sa.sa_handler = SIG_IGN;
+
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+
     char* line = (char*)NULL;
     rl_outstream = stderr;  //changement de la sortie vers la sortie d'erreur
-    
 
     while(1){
         //affiche le prompt et attend l'utilisateur
         line = readline(prompt_format());        
-        
-
-
+    
         //permet de retrouver une commande exécutée avec les flèches du haut et du bas
         add_history(line);    
         int nb_args = split_line(line);
@@ -235,8 +244,6 @@ int main(int argc, char **argv){
         strcpy(lineArray, lineCommandesExternes);
         recupererCommandeEtArguments(lineArray);
         printf("%s\n", commandesEtArgument[1]);*/
-
-
 
     //Test commandes externs dans le main
     //args[0] = "cat";
