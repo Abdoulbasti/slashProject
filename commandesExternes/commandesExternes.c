@@ -20,7 +20,7 @@ char** allocation()
 
 void gestionErreur(char* nomFonction)
 {
-    perror(nomFonction);
+    perror("bash :");
     exit(1);
 }
 
