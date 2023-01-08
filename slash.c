@@ -31,7 +31,12 @@ char* prompt_format(){
 
     //Dernière commande exécutée
     char last_return_value_str[4];
-    sprintf(last_return_value_str, "%d", last_return_value);
+    if(last_return_value != 255){
+        sprintf(last_return_value_str, "%d", last_return_value);
+    }
+    else{
+        sprintf(last_return_value_str, "%s", "SIG");
+    }
 
     //Couleur (vert: succès / rouge échec)
     char* first_color = "[";
