@@ -9,7 +9,7 @@
 #include "joker/joker.h"
 #include <stdlib.h>
 #include <string.h>
-#include "commandsExterns/commandesExterns.h"
+#include "commandesExternes/commandesExternes.h"
 #include <signal.h>
 
 char prompt_msg[100];       //Message du prompt

@@ -1,4 +1,4 @@
-#include "commandesExterns.h"
+#include "commandesExternes.h"
 #include <signal.h>
 #include <errno.h>
 
