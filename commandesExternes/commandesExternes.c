@@ -36,7 +36,6 @@ int executionCommandesExternesAutres(char* arguments[MAX_ARGS_NUMBER])
     sigaction(SIGINT, &sa_dfl, NULL);
     sigaction(SIGTERM, &sa_dfl, NULL);
 
-    printf("%s\n", arguments[0]);
     int retourExec  = execv(arguments[0], arguments);
 
     char* exec = "execv";
