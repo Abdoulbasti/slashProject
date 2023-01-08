@@ -235,13 +235,13 @@ int recherche_recursive(char** argv, char* arg, int num_arg, char* preffixTmp){
 
             //Quand il y a une étoile dans l'arg
             if(place != -1){
-
                 nb_arg_ajout += cherche_prefixe(argv, argTmp, place + strlen(preffix) - 1, num_arg + nb_arg_ajout);
                 free(argTmp);
 
             //Quand il n'y a pas d'étoile d'ans l'arg
             }else{
                 if(check_file_exist(argTmp)){
+                    strcat(argTmp, "/");
                     argv[num_arg + nb_arg_ajout] = argTmp;
                     nb_arg_ajout++;
                 }else{
