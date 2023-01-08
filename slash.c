@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "commandsExterns/commandesExterns.h"
+#include "redirections/redirections.h"
 
 char prompt_msg[100];       //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -17,6 +18,31 @@ char* args[MAX_ARGS_NUMBER];    //arguments de la commande entrée dans le promp
 char command[MAX_ARGS_STRLEN];      //commande entrée dans le prompt     
 char chemin_sym[PATH_MAX] = "/";    //Chemin relatif
 
+
+
+/*int verifierExisteRedirection(char* line)
+{
+    const int nombreRedirections = 7;
+
+    char haystack[100];
+    strcpy(haystack ,line);
+    char* needles[] = { " < ", " > ", " >> ", " >| ", " 2> ", " 2>> ", " 2>| "};
+    int bool = 0;
+
+    for(int i = 0; i<nombreRedirections; i++)
+    {
+        char *ptr = haystack;
+        // Boucle de recherche des occurrences de la chaîne courante
+        if((ptr = strstr(ptr, needles[i])) != NULL) 
+        {
+            bool = 1;
+
+            // Déplacement du pointeur pour continuer la recherche à partir de la fin de la chaîne trouvée
+            ptr += strlen(needles[i]);
+        }
+    }
+    return bool;
+}*/
 
 
 /*
@@ -203,43 +229,44 @@ int main(int argc, char **argv){
     while(1){
         //affiche le prompt et attend l'utilisateur
         line = readline(prompt_format());        
-        
+        add_history(line); 
 
 
-        //permet de retrouver une commande exécutée avec les flèches du haut et du bas
-        add_history(line);    
-
-        /*
-        S'il y'a l'existance de au moins un des signes de redirections
-        -On recupère la chaine se trouvant avant le tous premier signe
-        redirections et le metre dans lineAvantRedrection
-        -On applique la toute première redirection vers le fichier concerné,
-        puis 
-        -On effectue un split de lineAvantRedrection(1), 2 et 3
-
-        */
-        
-        //1
-        int nb_args = split_line(line);
-        //2
-        int joker_return_value = joker(nb_args, args);
-        //3
-        if(joker_return_value != -1){
-            nb_args = joker_return_value;
-        }
-
-        // for (size_t i = 0; i < nb_args; i++){
-        //     printf("%ld = %s\n", i, args[i]);
-        // }
 
         /*TRAITEMENTS DES REDIRECTIONS*/
-        
+        if(verifierExisteRedirection(line))
+        {
+            //printf("Il existe un signe de redirection\n");
+            char* lineCommande = appliquerRedirections(line);
+            printf("%s\n", lineCommande);
 
-
-        last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
-
-        //libération des arguments
-        freeAll(nb_args);
-        free(line);
+            //Executer lineCommande
+            
+            /*int nb_args = split_line(lineCommande);
+            int joker_return_value = joker(nb_args, args);
+            if(joker_return_value != -1){
+                nb_args = joker_return_value;
+            }
+            last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
+            //libération des arguments
+            freeAll(nb_args);*/
+            
+            free(lineCommande);
+        }
+        /*S'IL N'Y A PAS DE SIGNE DE REDIRECTION*/
+        else
+        {
+            //printf("Il n'existe pas un signe de redirection, si vous êtes sûr de l'avoir mis,\n verifier bien qu'il y'a un espace avant et apres chaque signe de redirection\n");
+            int nb_args = split_line(line);
+            int joker_return_value = joker(nb_args, args);
+            if(joker_return_value != -1){
+                nb_args = joker_return_value;
+            }
+            
+            last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
+            //libération des arguments
+            freeAll(nb_args);
+            free(line);
+        }
     }
 }
