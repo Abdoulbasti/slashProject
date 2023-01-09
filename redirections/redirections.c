@@ -1,74 +1,6 @@
-#include <unistd.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <sys/wait.h>
-#include "../constant.h"
-#include <sys/types.h>
-#include <fcntl.h>
-#include <errno.h>
-#define MAX_REDIRECTIONS 10
-#define MAX_FICHIERS 10
-
-void laGestionErreur(char* nomFonction);
-//cmd > fic
-void redirectionsStdoutSansEcrasement(char* nomFichier);
-//cmd >| fic
-void redirectionsStdoutAvecEcrasement(char* nomFichier);
-//cmd >> fic
-void redirectionsStdoutEnConcatenation(char* nomFichier);
-//cmd 2>> fic
-void redirectionsStderrEnConctenation(char* nomFichier);
-//cmd 2> fic
-void redirectionsStderrSansEcrasement(char* nomFichier);
-//cmd 2>| fic
-void redirectionsStderrAvecEcrasement(char* nomFichier);
-int ouvertureFichierEnConcatenation(char* nomFichier);
-int ouvertureFichierAvecEcrasement(char* nomFichier);
-int ouvertureFichierSansEcrasement(char* nomFichier);
-int ouvertureFichierStdin(char* nomFichier);
-int estRedirectionStderr(char* redirection);
-int estRedirectionStdout(char* redirection);
-int estRedirectionStdin(char* redirection);
-//cmd1 | cmd2   et cmd1 | cmd2 | ... | cmdn
-void redirectionsPipe(char* monFichier);
-//void redirectionStdout(char* commandesIntvoid redirectionStdout(char* commandesInternesExternes[MAX_ARGS_NUMBER], char* redirection, char* nomFichier);ernesExternes[MAX_ARGS_NUMBER], char* redirection, char* nomFichier);
-//cmd < fic
-void redirectionsStdin(char* redirection, char* nomFichier);
-void redirectionsStdout(char* redirection, char* nomFichier);
-void redirectionsStderr(char* redirection, char* nomFichier);
-void redirections(char* redirection, char* nomFichier);
-int compterNombreRedirections(char* line);
-int verifierExisteRedirection(char* line);
-void* recupererChaineAvantRedirection(char* line, char* sub_string);
-char* recupererChaineApresRedirection(char* chaineAvantRedirection, char* line);
-void stockerRedirectionsEtFichiers(char* line,char* tabRedirections[MAX_REDIRECTIONS], char* tabFichier[MAX_FICHIERS]);
-int compterNombreFichiers(char* line);
-char** splitChaine(char *str, const char *delimiter);
-int entierPaire(int i);
-int verifierFormatRedirection(char* chaineAPartirPremiereRedirection);
-int verifierTailleFormatRedirection(char* chaineAPartirPremiereRedirection);
-
-int redirectionOrdonee(char* chaineAPartirPremiereRedirection);
-
-void initialiserTabRF(char* tabRedirections[MAX_REDIRECTIONS], char* tabFichier[MAX_FICHIERS]);
-
-void executerCommande(char* line);
-
-char* appliquerRedirections(char* line);
-
-void ajouterFd(int fd);
-
-
+#include "redirections.h"
 int FDs[10] = {0};
-int main(int argc, char** argv)
+/*int main(int argc, char** argv)
 {
     char* line = "ls -al < texte >> out 2> err";
     char* commande = appliquerRedirections(line);
@@ -76,13 +8,15 @@ int main(int argc, char** argv)
     {
         printf("fds : %d\n", FDs[i]);
     }
+    //execlp("cat", "cat", "-acdc", NULL);
+    //free(commande);
 
     //printf("Test\n");
     //printf("La commandes est : %s\n",  commande);
-    //execlp("cat", "cat", "-acdc", NULL);
+    
 
     return 0;
-}
+}*/
 
 //Test ok
 void ajouterFd(int fd)
@@ -268,11 +202,7 @@ void redirectionsStdout(char* redirections, char* nomFichier)
     {
         char* message = "Veuillez entrer le bon signe de redirection vers la stdout\n";
         printf("%s", message);
-        
-        //free(message);
     }
-
-    //free(redirections);
 }
 
 
@@ -301,11 +231,7 @@ void redirectionsStderr(char* redirections, char* nomFichier)
     {
         char* message = "Veuillez entrer le bon signe de redirection vers la stderr\n";
         printf("%s", message);
-
-        //free(message);
     }
-
-    //free(redirections);
 }
 
 /*
@@ -391,10 +317,7 @@ int compterNombreRedirections(char* lineRedirection)
             // Déplacement du pointeur pour continuer la recherche à partir de la fin de la chaîne trouvée
             ptr += strlen(needles[i]);
         }
-        //free(ptr);
     }
-
-    //free(needles);
     return count;
 }
 
@@ -572,7 +495,7 @@ int verifierTailleFormatRedirection(char* chaineAPartirPremiereRedirection)
     else
     {   return 0;   }
 
-    //free(substrings);
+    free(substrings);
 }
 
 /*
@@ -627,9 +550,11 @@ void stockerRedirectionsEtFichiers(char* line, char* tabRedirections[MAX_REDIREC
                         compteur2++;
                     }
                 }
-                //free(substrings);
-                //free(chaineAvantRedirection);;
+                free(substrings);
+                free(chaineApresPremierRedirection);
+                //free(chaineAvantRedirection);
             }
+            //free(chaineApresPremierRedirection);
         }
     }
 }
@@ -679,7 +604,7 @@ char* recupererChaineApresRedirection(char* chaineAvantRedirection, char* line)
     *(redirections + tailleRedirection) = '\0';
 
 
-    //free(chaineAvantRedirection);
+    free(chaineAvantRedirection);
     return redirections;
 }
 

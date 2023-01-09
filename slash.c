@@ -229,31 +229,39 @@ int main(int argc, char **argv){
     while(1){
         //affiche le prompt et attend l'utilisateur
         line = readline(prompt_format());        
-        add_history(line); 
+        //permet de retrouver une commande exécutée avec les flèches du haut et du bas
+        add_history(line);    
+        int nb_args = split_line(line);
+        int joker_return_value = joker(nb_args, args);
+        if(joker_return_value != -1){
+            nb_args = joker_return_value;
+        }
+        last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
+
+        //libération des arguments
+        freeAll(nb_args);
+        free(line);
+
 
 
 
         /*TRAITEMENTS DES REDIRECTIONS*/
-        if(verifierExisteRedirection(line))
+        /*if(verifierExisteRedirection(line))
         {
-            //printf("Il existe un signe de redirection\n");
             char* lineCommande = appliquerRedirections(line);
-            printf("%s\n", lineCommande);
+            //printf("%s\n", lineCommande);     
 
             //Executer lineCommande
-            
-            /*int nb_args = split_line(lineCommande);
+
+            int nb_args = split_line(lineCommande);
             int joker_return_value = joker(nb_args, args);
             if(joker_return_value != -1){
-                nb_args = joker_return_value;
+                nb_args = joker_return_value; 
             }
             last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
-            //libération des arguments
-            freeAll(nb_args);*/
-            
+            freeAll(nb_args);
             free(lineCommande);
         }
-        /*S'IL N'Y A PAS DE SIGNE DE REDIRECTION*/
         else
         {
             //printf("Il n'existe pas un signe de redirection, si vous êtes sûr de l'avoir mis,\n verifier bien qu'il y'a un espace avant et apres chaque signe de redirection\n");
@@ -267,6 +275,6 @@ int main(int argc, char **argv){
             //libération des arguments
             freeAll(nb_args);
             free(line);
-        }
+        }*/
     }
 }

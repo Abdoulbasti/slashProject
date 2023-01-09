@@ -11,6 +11,7 @@
 #include <readline/history.h>
 #include <sys/wait.h>
 #include "../constant.h"
+#include <errno.h>
 
 
 void recupererCommandeEtArguments(char line[]);

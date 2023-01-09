@@ -12,17 +12,15 @@ Execution de tous les autres commandes se trouvant à un autre emplacement que c
 */
 int executionCommandesExternesAutres(char* arguments[MAX_ARGS_NUMBER])
 {
-    int codeRetour = 0;
     int retourExec  = execv(arguments[0], arguments);
+
     char* exec = "execv";
     if(retourExec == -1) 
     {
-        codeRetour = 1;
         printf("exection de %s a echoue \n", exec);
         gestionErreur(exec);
+        return errno;
     }
-
-    return codeRetour;
 }
 
 
@@ -33,18 +31,17 @@ Execution des commandes extern
 */
 int executionCommandeExternes(char* arguments[MAX_ARGS_NUMBER])
 {
-    int codeRetour =0;
+    int codeRetour;
     int retourExec = execvp(arguments[0], arguments);
-    char* exec = "execvp";
     
-    //Si l'execution d'une commande de Path echou on essaye alors celui se trouvant dans un autre emplacement
+    char* exec = "execvp";
     if (retourExec == -1)
     {
         printf("exection de %s a echoue \n", exec);
         codeRetour = executionCommandesExternesAutres(arguments);
-    }
 
-    return codeRetour;
+        return codeRetour;
+    }
 }
 
 
@@ -56,7 +53,6 @@ l'utilisateur.
 int commandesExternes(char* commandes[MAX_ARGS_NUMBER])
 
 {
-
     char* nomFonction = "fork";
     
     pid_t pid = fork();
@@ -69,9 +65,11 @@ int commandesExternes(char* commandes[MAX_ARGS_NUMBER])
     else if(pid == 0)
     {
         codeRetour = executionCommandeExternes(commandes);
+
+        return codeRetour;
     }
     else 
-    {  
+    {   
         int statusWait;
         int retourWait  = wait(&statusWait);
         nomFonction = "wait";
