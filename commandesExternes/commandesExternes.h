@@ -13,7 +13,6 @@
 #include "../constant.h"
 #include <errno.h>
 
-
 void recupererCommandeEtArguments(char line[]);
 
 void gestionErreur(char* nomFonction);
