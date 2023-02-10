@@ -10,6 +10,7 @@ addendum-erratum.md
 include/
 equipes.md
 test.sh
+<<<<<<< HEAD
 Interaction_attendue
 Interaction_réelle
 todo
@@ -18,3 +19,12 @@ Makefile
 Projet_test.sh
 setenv
 lienSymbolique
+=======
+notes.txt
+salut
+salut.c
+testExec.c
+testExec
+Interaction_réelle
+Interaction_attendue
+>>>>>>> b1ed5fbf0d2e4648eae8f4001be1f0df0d7be5d9
