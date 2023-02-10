@@ -9,9 +9,15 @@
 #include "joker/joker.h"
 #include <stdlib.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #include "commandsExterns/commandesExterns.h"
 >>>>>>> b1ed5fbf0d2e4648eae8f4001be1f0df0d7be5d9
+=======
+#include <string.h>
+#include "commandesExternes/commandesExternes.h"
+#include <signal.h>
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae
 
 char prompt_msg[100];       //Message du prompt
 int last_return_value = 0;  //valeur retour de la dernière commande
@@ -32,7 +38,12 @@ char* prompt_format(){
 
     //Dernière commande exécutée
     char last_return_value_str[4];
-    sprintf(last_return_value_str, "%d", last_return_value);
+    if(last_return_value != 255){
+        sprintf(last_return_value_str, "%d", last_return_value);
+    }
+    else{
+        sprintf(last_return_value_str, "%s", "SIG");
+    }
 
     //Couleur (vert: succès / rouge échec)
     char* first_color = "[";
@@ -94,10 +105,15 @@ int split_line(char* line){
         fexit(last_return_value);
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     char *tmp;
 =======
     char *tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
 >>>>>>> b1ed5fbf0d2e4648eae8f4001be1f0df0d7be5d9
+=======
+    //char *tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+    char * tmp;
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae
     int i = 0;  //nombre d'arguments
 
     //Rien n'est rentré dans le prompt
@@ -105,15 +121,21 @@ int split_line(char* line){
         strcpy(command, (const char*) "");
         return 0;
     }
-
-    tmp = strtok(line, " ");    //découpe la partie avant le première espace
-    strcpy(command, (const char*) tmp);     //la première partie est la commande
-    while(tmp != NULL){
+    //strcpy(tmp, strtok(NULL, " "));
+    char * tmp2 = strtok(line, " ");   //découpe la partie avant le première espace
+    strcpy(command, (const char*) tmp2);     //la première partie est la commande
+    while(tmp2 != NULL){
         if(i != 0){
             //on ajoute un argument
             args[i-1] = tmp;
         }
-        tmp = strtok(NULL, " ");    //découpe la partie avant le première espace
+        tmp2 = strtok(NULL, " ");       //découpe la partie avant le première espace
+        if(tmp2 != NULL){
+            //free(tmp);
+            tmp = (char *) malloc(sizeof(char) * MAX_ARGS_STRLEN);
+            strcpy(tmp, tmp2);
+        }
+        //tmp = strtok(NULL, " ");    
         i++;
     }
     return i-1;
@@ -122,17 +144,21 @@ int split_line(char* line){
 
 /*
 <<<<<<< HEAD
+<<<<<<< HEAD
     int interpretation_command(int argc):
 =======
 
 int interpretation_command(int argc, char commandesAndArguments):
 >>>>>>> b1ed5fbf0d2e4648eae8f4001be1f0df0d7be5d9
+=======
+
+int interpretation_command(int argc, char commandesAndArguments):
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae
     regarde quel commande correspond a quel fonction et l'execute
     puis renvoie la valeur de retour de la fonction*/
 
 int interpretation_command(int argc){
     //aucune commande
-    
     if (strcmp((const char*) command, (const char*) "") == 0){
         return last_return_value;
     }
@@ -161,16 +187,24 @@ int interpretation_command(int argc){
     //Comande cd
     if(strcmp((const char*) command, (const char*) "cd") == 0){
         return cd(argc, args);
+    }else if(strcmp((const char*) command, (const char*) "true") == 0){
+        return 0;
+    }else if(strcmp((const char*) command, (const char*) "false") == 0){
+        return 1;
     }
-    //commandes externs
+    //commandes externes
     else
     {
-        char * argvTmp[MAX_ARGS_STRLEN];
+        char* argvTmp[MAX_ARGS_STRLEN];
+        //initialisation des champs
+        for(int k = 0; k<=MAX_ARGS_STRLEN; k++)
+        {
+            argvTmp[k] = NULL;
+        }
         argvTmp[0] = command;
         for (size_t i = 0; i < argc; i++){
-            argvTmp[1+i] = args[0];
+            argvTmp[i+1] = args[i];
         }
-        
         return commandesExternes(argvTmp);
     }
     
@@ -191,53 +225,60 @@ void freeAll(int argc){
 }
 
 int main(int argc, char **argv){
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(struct sigaction));
+    sa.sa_handler = SIG_IGN;
+
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+
     char* line = (char*)NULL;
     rl_outstream = stderr;  //changement de la sortie vers la sortie d'erreur
-    
 
     while(1){
         //affiche le prompt et attend l'utilisateur
-        line = readline(prompt_format());
-        
-        //Traitement pour commandes externes
-        char lineArray[MAX_ARGS_NUMBER];
-        strcpy(lineArray, line);
-       
-
-
-        /*ici...
-        char lineArray[MAX_ARGS_NUMBER];
-        strcpy(lineArray, line);
-        recupererCommandeEtArguments(lineArray);
-        printf("%s\n", commandesEtArgument[1]);*/
-        
-
-
+        line = readline(prompt_format());        
+    
         //permet de retrouver une commande exécutée avec les flèches du haut et du bas
         add_history(line);    
         int nb_args = split_line(line);
+<<<<<<< HEAD
         int joker_return_value = joker(nb_args, args);
 <<<<<<< HEAD
         if(joker_return_value == -1){
             continue;
         }
         nb_args += joker_return_value;
+=======
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae
         
-        last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
 
+<<<<<<< HEAD
         //libération de la mémoire du string renvoyé par readline
         free(line);
 =======
+=======
+        int joker_return_value = joker(nb_args, args);
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae
 
         if(joker_return_value != -1){
-            nb_args += joker_return_value;
+            nb_args = joker_return_value;
         }
+
+        // for (size_t i = 0; i < nb_args; i++){
+        //     printf("%ld = %s\n", i, args[i]);
+        // }
+        
 
         last_return_value = interpretation_command(nb_args) % 256;  //return_value entre -256 et 256
 
         //libération des arguments
         freeAll(nb_args);
+<<<<<<< HEAD
 >>>>>>> b1ed5fbf0d2e4648eae8f4001be1f0df0d7be5d9
+=======
+        free(line);
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae
     }
 
 
@@ -246,8 +287,6 @@ int main(int argc, char **argv){
         strcpy(lineArray, lineCommandesExternes);
         recupererCommandeEtArguments(lineArray);
         printf("%s\n", commandesEtArgument[1]);*/
-
-
 
     //Test commandes externs dans le main
     //args[0] = "cat";

@@ -11,13 +11,17 @@ include/
 equipes.md
 test.sh
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae
 Interaction_attendue
-Interaction_réelle
+Interaction_reelle
 todo
 notes.txt
 Makefile
 Projet_test.sh
 setenv
+<<<<<<< HEAD
 lienSymbolique
 =======
 notes.txt
@@ -28,3 +32,6 @@ testExec
 Interaction_réelle
 Interaction_attendue
 >>>>>>> b1ed5fbf0d2e4648eae8f4001be1f0df0d7be5d9
+=======
+lienSymbolique
+>>>>>>> 6c1545498a912da5d66fc577ac6afa64b6df7bae

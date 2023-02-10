@@ -12,7 +12,6 @@
 #include <sys/wait.h>
 #include "../constant.h"
 
-
 void recupererCommandeEtArguments(char line[]);
 
 void gestionErreur(char* nomFonction);
